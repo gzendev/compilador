@@ -1,7 +1,6 @@
 package lyc.compiler.factories;
 
 import lyc.compiler.Lexer;
-
 import java.io.Reader;
 import java.io.StringReader;
 

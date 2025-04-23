@@ -4,6 +4,11 @@ import java_cup.runtime.*;
 
 class Parser;
 
+parser code
+{:
+	//SymbolTableStruct currentSymbol;
+	//public List<SymbolTableStruct> symbolList = new ArrayList();
+:};
 
 // Terminals
 terminal ASSIG;
@@ -14,26 +19,257 @@ terminal DIV;
 terminal OPEN_BRACKET;
 terminal CLOSE_BRACKET;
 terminal INTEGER_CONSTANT;
+terminal STRING_CONSTANT;
+terminal FLOAT_CONSTANT;
 terminal IDENTIFIER;
+terminal OP_MAY;
+terminal OP_MEN;
+terminal OP_IG;
+terminal OP_MAYIG;
+terminal OP_MENIG;
+terminal AND;
+terminal OR;
+terminal NOT;
+terminal DISTINCT;
+terminal COMA;
+terminal DOS_PUNTOS;
+terminal PYC;
+terminal CLOSE_CURLY;
+terminal OPEN_CURLY;
+terminal COR_A;
+terminal COR_C;
+terminal IF;
+terminal ELSE;
+terminal FOR;
+terminal INIT;
+terminal WRITE;
+terminal READ;
+terminal FLOAT;
+terminal INT;
+terminal STRING;
+terminal WHILE;
+terminal NEGATIVECALC;
+terminal SUMFIRSTPRIMES;
 
 // Non Terminals
+non terminal ss;
+non terminal declaration;
+non terminal listdec;
+non terminal sentdec;
+non terminal program;
+non terminal listid;
+non terminal iteration;
+non terminal selection;
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
 non terminal term;
 non terminal factor;
+non terminal input;
+non terminal output;
+non terminal condition;
+non terminal comparison;
+non terminal comparator;
+non terminal function;
+non terminal listconst;
+non terminal listexpr;
 
 // Start Symbol Definition
-start with sentence;
+start with ss;
 
-sentence ::= assignment {: System.out.println("End"); :};
-assignment ::= IDENTIFIER ASSIG expression {: System.out.println("Assignment"); :};
-expression ::= expression PLUS term {: System.out.println("+"); :};
-expression ::= expression SUB term {: System.out.println("-"); :};
-expression ::= term {: System.out.println("Expression = Term"); :};
-term ::= term MULT factor {: System.out.println("*"); :};
-term ::= term DIV factor {: System.out.println("/"); :};
-term ::= factor {: System.out.println("Term = factor"); :};
-factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant ); :};
-factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+// Grammar Rules
+ss
+    ::= declaration program
+        {: System.out.println("Inicio de programa principal con bloque de declaracion de variables: "); :}
+    |   declaration
+        {: System.out.println("Inicio del programa principal con declaracion y sin programa: "); :}
+    |   program
+        {: System.out.println("Inicio del programa principal sin declaracion: "); :}
+    |
+        {: System.out.println("Sin nada: "); :}
+    ;
+
+declaration
+    ::= INIT OPEN_CURLY listdec CLOSE_CURLY
+        {: System.out.println("Declaracion de variables: "); :}
+    ;
+
+listdec
+    ::= listdec sentdec
+        {: System.out.println("Lista de sentencia de declaracion de variables: "); :}
+    |   sentdec
+        {:
+            System.out.println("Sentencia unica de declaracion de variables: ");
+            //symbolList.add(currentSymbol);
+        :}
+    ;
+
+sentdec
+    ::= listid DOS_PUNTOS INT
+        {: System.out.println("Lista de variables enteras: "); :}
+    |   listid DOS_PUNTOS FLOAT
+        {: System.out.println("Lista de variables flotantes: "); :}
+    |   listid DOS_PUNTOS STRING
+        {: System.out.println("Lista de variables strings: "); :}
+    ;
+
+listid
+    ::= listid COMA IDENTIFIER
+        {: System.out.println("Lista de IDs: "); :}
+    |   IDENTIFIER:ident
+    ;
+
+program
+    ::= sentence
+        {: System.out.println("Sentencia única en el programa: "); :}
+    |   sentence PYC
+        {: System.out.println("Sentencia con punto y coma en el programa: "); :}
+    |   program sentence
+        {: System.out.println("Programa con múltiples sentencias: "); :}
+    |   program sentence PYC
+        {: System.out.println("Programa con múltiples sentencias: "); :}
+    ;
+
+sentence
+    ::= assignment
+        {: System.out.println("Asignación encontrada"); :}
+    |   iteration
+        {: System.out.println("Iteración encontrada"); :}
+    |   selection
+        {: System.out.println("Selección encontrada"); :}
+    |   input
+        {: System.out.println("Entrada: "); :}
+    |   output
+        {: System.out.println("Salida: "); :}
+    ;
+
+// Entrada y salida
+input
+    ::= READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET
+        {: System.out.println("Sentencia de Entrada: "); :}
+    ;
+
+output
+    ::= WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET
+        {: System.out.println("Sentencia de entrada de una constante string: "); :}
+    |   WRITE OPEN_BRACKET IDENTIFIER CLOSE_BRACKET
+        {: System.out.println("Sentencia de entrada de un id: "); :}
+    ;
+
+assignment
+    ::= listid ASSIG expression
+        {: System.out.println("Lista de asignacion de variables: "); :}
+    ;
+
+selection
+    ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
+        {: System.out.println("Estructura if con condición: "); :}
+    |   IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY ELSE OPEN_CURLY program CLOSE_CURLY
+        {: System.out.println("Estructura if-else con condición: "); :}
+    ;
+
+iteration
+    ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
+        {: System.out.println("Estructura while con condición: "); :}
+    |   FOR OPEN_BRACKET assignment PYC condition PYC expression CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
+        {: System.out.println("Estructura for con asignación: " + ", condición: " + ", y expresión: "); :}
+    ;
+
+condition
+    ::= comparison
+        {: System.out.println("Condición simple: "); :}
+    |   condition AND comparison
+        {: System.out.println("Condición compuesta con AND: " + " && "); :}
+    |   condition OR comparison
+        {: System.out.println("Condición compuesta con OR: " + " || "); :}
+    ;
+
+comparison
+    ::= expression comparator expression
+        {: System.out.println("Comparación: "); :}
+    |   NOT expression comparator expression
+        {: System.out.println("Comparación: "); :}
+    ;
+
+comparator
+    ::= OP_MAYIG
+        {: System.out.println("Comparador >= "); :}
+    |   OP_MENIG
+        {: System.out.println("Comparador <= "); :}
+    |   OP_MAY
+        {: System.out.println("Comparador > "); :}
+    |   OP_MEN
+        {: System.out.println("Comparador < "); :}
+    |   OP_IG
+        {: System.out.println("Comparador == "); :}
+    ;
+
+expression
+    ::= expression PLUS term
+        {: System.out.println("Expresión suma: "); :}
+    |   expression SUB term
+        {: System.out.println("Expresión resta: "); :}
+    |   term
+        {: System.out.println("Expresión simple: "); :}
+    |   function
+        {: System.out.println("Expresion es Funcion especial: "); :}
+    ;
+
+function
+  ::= NEGATIVECALC OPEN_BRACKET listconst CLOSE_BRACKET
+      {: System.out.println("Regla: funcion -> negativeCalculation"); :}
+  | SUMFIRSTPRIMES OPEN_BRACKET expression CLOSE_BRACKET
+      {: System.out.println("Regla: funcion -> sumFirstPrimes"); :}
+  ;
+
+listconst
+    ::= listconst COMA INTEGER_CONSTANT
+        {: System.out.println("Componente de lista: Constante entera "); :}
+    |   listconst COMA FLOAT_CONSTANT
+        {: System.out.println("Componente de lista: Constante flotante "); :}
+    |   FLOAT_CONSTANT
+        {: System.out.println("Constante entera: "); :}
+    |   INTEGER_CONSTANT
+        {: System.out.println("Constante entera: "); :}
+    ;
+
+listexpr
+    ::= listexpr COMA expression
+        {: System.out.println("Componente de lista: expresion "); :}
+    |   expression
+        {: System.out.println("Expresion: "); :}
+    ;
+
+term
+    ::= term MULT factor
+        {: System.out.println("Término multiplicación: "); :}
+    |   term DIV factor
+        {: System.out.println("Término división: " + " / "); :}
+    |   factor
+        {: System.out.println("Término simple: "); :}
+    ;
+
+factor
+    ::= IDENTIFIER:value
+        {:
+            System.out.println("Factor ID: ");
+            //currentSymbol = new SymbolTableStruct(null,null,null,0);
+        :}
+    |   INTEGER_CONSTANT:value
+        {:
+            System.out.println("Factor constante entera: ");
+            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Int",value,0));
+        :}
+    |   FLOAT_CONSTANT:value
+        {:
+            System.out.println("Factor constante flotante: ");
+            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Float",value,0));
+        :}
+    |   STRING_CONSTANT:value
+        {:
+            System.out.println("Factor constante string: ");
+            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"String",value,value.toString().length()));
+        :}
+    |   OPEN_BRACKET expression CLOSE_BRACKET
+        {: System.out.println("Factor expresión entre paréntesis: "); :}
+    ;

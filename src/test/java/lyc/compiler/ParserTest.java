@@ -15,12 +15,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static lyc.compiler.Constants.EXAMPLES_ROOT_DIRECTORY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Disabled
 public class ParserTest {
 
     @Test
     public void assignmentWithExpression() throws Exception {
-        compilationSuccessful("c=d*(e-21)/4");
+        compilationSuccessful("c:=d*(e - 21)/4");
     }
 
     @Test
@@ -78,6 +77,15 @@ public class ParserTest {
         compilationSuccessful(readFromFile("while.txt"));
     }
 
+    @Test
+    void funcionNegativeCalculation() throws Exception {
+        compilationSuccessful(readFromFile("negativeCalculation.txt"));
+    }
+
+    @Test
+    void funcionSumFirstPrimes() throws Exception {
+        compilationSuccessful(readFromFile("sumFirstPrimes.txt"));
+    }
 
     private void compilationSuccessful(String input) throws Exception {
         assertThat(scan(input).sym).isEqualTo(ParserSym.EOF);
@@ -92,9 +100,9 @@ public class ParserTest {
     }
 
     private String readFromFile(String fileName) throws IOException {
-        URL url = new URL(EXAMPLES_ROOT_DIRECTORY + "/%s".formatted(fileName));
-        assertThat(url).isNotNull();
-        return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        assertThat(inputStream).isNotNull();
+        return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     }
 
 

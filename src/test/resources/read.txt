@@ -1,0 +1,4 @@
+init {
+    base : Int
+}
+read(base) #+ base es una variable +#
