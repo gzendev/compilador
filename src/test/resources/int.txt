@@ -6,4 +6,4 @@ init{
 a := -32768
 b := 32767
 
-write("a y b son enteros validos.")
+write("a y b son enteros validos")

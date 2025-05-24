@@ -109,7 +109,7 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   {IntegerConstant} {
       try {
           int value = Integer.parseInt(yytext());
-          if (value < -32768 || value > 32767) { // NP: Agrego validacion de rango para enteros.
+          if (value < INT_MIN || value > INT_MAX) {
               throw new InvalidIntegerException("Integer constant out of 16-bit range: " + yytext());
           }
       } catch (NumberFormatException e) {
@@ -121,7 +121,10 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   }
   {FloatConstants} {
       try {
-          Float.parseFloat(yytext()); // NP: Esto nos valida los 16 y 16 bits.
+          float value = Float.parseFloat(yytext());
+          if (value < FLT_MIN || value > FLT_MAX) {
+            throw new InvalidFloatException("Float constant out of 32-bit range: " + yytext());
+          }
       } catch (NumberFormatException e) {
           throw new InvalidFloatException("Invalid float constant: " + yytext());
       }
@@ -130,7 +133,7 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
       return symbol(ParserSym.FLOAT_CONSTANT, yytext());
   }
   {StringConstant} {
-      if (yytext().length() > 50) {
+      if (yytext().length() > STR_MAX) {
         throw new InvalidLengthException("String constant too long: " + yytext());
       }
       System.out.println("Token: " + yytext() + " | Tipo: STRING_CONSTANT");

@@ -6,4 +6,4 @@ init{
 a := 3.5e+38
 b := -1e-50
 
-write("a y b NO son floats validos. Se lanzo error.")
+write("a y b NO son floats validos. Se lanzo error")
