@@ -1,0 +1,9 @@
+init{
+  a : Float
+  b : Float
+}
+
+a := 3.4028235e+38f
+b := -3.4028235e+38f
+
+write("a y b son floats validos.")

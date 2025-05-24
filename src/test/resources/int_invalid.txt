@@ -1,0 +1,9 @@
+init{
+  a : Int
+  b : Int
+}
+
+a := -32769
+b := 32768
+
+write("a y b NO son enteros validos. Se lanzo error.")
