@@ -108,15 +108,23 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   /* Constants */
   {IntegerConstant} {
       try {
-        Integer.parseInt(yytext());
+          int value = Integer.parseInt(yytext());
+          if (value < -32768 || value > 32767) { // NP: Agrego validacion de rango para enteros.
+              throw new InvalidIntegerException("Integer constant out of 16-bit range: " + yytext());
+          }
       } catch (NumberFormatException e) {
-        throw new InvalidIntegerException("Invalid integer constant: " + yytext());
+          throw new InvalidIntegerException("Invalid integer constant: " + yytext());
       }
       System.out.println("Token: " + yytext() + " | Tipo: INTEGER_CONSTANT");
       addToSymbolListIfNotExists(new SymbolTableStruct("_".concat(yytext()), "Int", yytext(), 0));
       return symbol(ParserSym.INTEGER_CONSTANT, yytext());
   }
   {FloatConstants} {
+      try {
+          Float.parseFloat(yytext()); // NP: Esto nos valida los 16 y 16 bits.
+      } catch (NumberFormatException e) {
+          throw new InvalidFloatException("Invalid float constant: " + yytext());
+      }
       System.out.println("Token: " + yytext() + " | Tipo: FLOAT_CONSTANT");
       addToSymbolListIfNotExists(new SymbolTableStruct("_".concat(yytext()), "Float", yytext(), 0));
       return symbol(ParserSym.FLOAT_CONSTANT, yytext());
