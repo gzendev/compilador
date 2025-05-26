@@ -1,6 +1,10 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
+import lyc.compiler.model.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 class Parser;
 
@@ -8,6 +12,112 @@ parser code
 {:
 	//SymbolTableStruct currentSymbol;
 	//public List<SymbolTableStruct> symbolList = new ArrayList();
+	public List<Terceto> tercetos = new ArrayList<>();
+	public List<SymbolTableEntry> symbolTable = new ArrayList<>();
+	private int terceto_count = 1;
+	private Stack<Integer> pila_tercetos = new Stack<>();
+	private Stack<String> pila_ids = new Stack<>();
+	private Stack<String> pila_tipos = new Stack<>();
+	private String currentType;
+	
+	private int newTerceto(String op, String op1, String op2) {
+		Terceto t = new Terceto(op, op1, op2, terceto_count);
+		tercetos.add(t);
+		return terceto_count++;
+	}
+	
+	private String referenceTerceto(int num) {
+		return "[" + num + "]";
+	}
+	
+	private void apilar(int num) {
+		pila_tercetos.push(num);
+	}
+	
+	private int desapilar() {
+		return pila_tercetos.pop();
+	}
+
+	private void addSymbol(String name, String type, String value, int length) throws Exception {
+		SymbolTableEntry entry = new SymbolTableEntry(name, type, value, length);
+		if (symbolTable.contains(entry)) {
+			throw new Exception("Variable ya declarada: " + name);
+		}
+		symbolTable.add(entry);
+	}
+
+	private String getType(String name) {
+		for (SymbolTableEntry entry : symbolTable) {
+			if (entry.getNombre().equals(name)) {
+				return entry.getTipoDato();
+			}
+		}
+		return null;
+	}
+
+	private void checkTypes(String type1, String type2) throws Exception {
+		if (!type1.equals(type2)) {
+			throw new Exception("Error de tipos: no se puede asignar " + type2 + " a " + type1);
+		}
+	}
+
+	private String getExpressionType(int tercetoNum) {
+		Terceto t = tercetos.get(tercetoNum - 1);
+		String op = t.getOperador();
+		
+		switch(op) {
+			case "+":
+			case "-":
+			case "*":
+			case "/":
+				String type1 = getOperandType(t.getOperando1());
+				String type2 = getOperandType(t.getOperando2());
+				if (type1.equals("Float") || type2.equals("Float")) {
+					return "Float";
+				}
+				return "Int";
+			case "id":
+				return getType(t.getOperando1());
+			case "cte":
+				if (t.getOperando1().contains(".")) {
+					return "Float";
+				} else if (t.getOperando1().startsWith("\"")) {
+					return "String";
+				}
+				return "Int";
+			default:
+				return "Unknown";
+		}
+	}
+
+	private String getOperandType(String operand) {
+		if (operand.startsWith("[")) {
+			int num = Integer.parseInt(operand.substring(1, operand.length()-1));
+			return getExpressionType(num);
+		}
+		return getType(operand);
+	}
+
+	private boolean areTypesCompatible(String type1, String type2) {
+		if (type1.equals(type2)) return true;
+		if ((type1.equals("Int") && type2.equals("Float")) ||
+			(type1.equals("Float") && type2.equals("Int"))) return true;
+		return false;
+	}
+
+	private void validateIdentifierLength(String id) throws Exception {
+		if (id.length() > 50) {
+			throw new Exception("Identificador demasiado largo: " + id);
+		}
+	}
+
+	private void pushType(String type) {
+		pila_tipos.push(type);
+	}
+
+	private String popType() {
+		return pila_tipos.pop();
+	}
 :};
 
 // Terminals
@@ -74,6 +184,11 @@ non terminal function;
 non terminal listconst;
 non terminal listexpr;
 
+// Attributes for non terminals
+non terminal Integer expr_val;
+non terminal String comp_op;
+non terminal Integer cond_val;
+
 // Start Symbol Definition
 start with ss;
 
@@ -106,17 +221,46 @@ listdec
 
 sentdec
     ::= listid DOS_PUNTOS INT
-        {: System.out.println("Lista de variables enteras: "); :}
+        {: 
+            currentType = "Int";
+            while (!pila_ids.empty()) {
+                String id = pila_ids.pop();
+                addSymbol(id, currentType, null, 0);
+            }
+            System.out.println("Lista de variables enteras: "); 
+        :}
     |   listid DOS_PUNTOS FLOAT
-        {: System.out.println("Lista de variables flotantes: "); :}
+        {: 
+            currentType = "Float";
+            while (!pila_ids.empty()) {
+                String id = pila_ids.pop();
+                addSymbol(id, currentType, null, 0);
+            }
+            System.out.println("Lista de variables flotantes: "); 
+        :}
     |   listid DOS_PUNTOS STRING
-        {: System.out.println("Lista de variables strings: "); :}
+        {: 
+            currentType = "String";
+            while (!pila_ids.empty()) {
+                String id = pila_ids.pop();
+                addSymbol(id, currentType, null, 0);
+            }
+            System.out.println("Lista de variables strings: "); 
+        :}
     ;
 
 listid
-    ::= listid COMA IDENTIFIER
-        {: System.out.println("Lista de IDs: "); :}
-    |   IDENTIFIER:ident
+    ::= listid COMA IDENTIFIER:id
+        {:
+            validateIdentifierLength(id.toString());
+            pila_ids.push(id.toString());
+            System.out.println("Lista de IDs: "); 
+        :}
+    |   IDENTIFIER:id
+        {:
+            validateIdentifierLength(id.toString());
+            pila_ids.push(id.toString());
+        :}
     ;
 
 program
@@ -157,38 +301,118 @@ output
     ;
 
 assignment
-    ::= listid ASSIG expression
-        {: System.out.println("Lista de asignacion de variables: "); :}
+    ::= IDENTIFIER:id ASSIG expression:e
+        {:
+            String idType = getType(id.toString());
+            if (idType == null) {
+                throw new Exception("Variable no declarada: " + id);
+            }
+            String exprType = getExpressionType(e);
+            if (!areTypesCompatible(idType, exprType)) {
+                throw new Exception("No se puede asignar " + exprType + " a variable de tipo " + idType);
+            }
+            newTerceto(":=", id.toString(), referenceTerceto(e));
+            System.out.println("Asignación: generando terceto"); 
+        :}
     ;
 
 selection
-    ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura if con condición: "); :}
-    |   IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY ELSE OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura if-else con condición: "); :}
+    ::= IF OPEN_BRACKET condition:c CLOSE_BRACKET
+        {:
+            int terceto_cond = newTerceto("BF", referenceTerceto(c), "_");
+            apilar(terceto_cond);
+        :}
+        OPEN_CURLY program CLOSE_CURLY
+        {:
+            int terceto_fin = terceto_count;
+            int terceto_cond = desapilar();
+            tercetos.get(terceto_cond-1).setOperando2(referenceTerceto(terceto_fin));
+        :}
+    |   IF OPEN_BRACKET condition:c CLOSE_BRACKET
+        {:
+            int terceto_cond = newTerceto("BF", referenceTerceto(c), "_");
+            apilar(terceto_cond);
+        :}
+        OPEN_CURLY program CLOSE_CURLY
+        {:
+            int terceto_salto = newTerceto("BI", "_", "_");
+            int terceto_else = terceto_count;
+            int terceto_cond = desapilar();
+            tercetos.get(terceto_cond-1).setOperando2(referenceTerceto(terceto_else));
+            apilar(terceto_salto);
+        :}
+        ELSE OPEN_CURLY program CLOSE_CURLY
+        {:
+            int terceto_fin = terceto_count;
+            int terceto_salto = desapilar();
+            tercetos.get(terceto_salto-1).setOperando1(referenceTerceto(terceto_fin));
+        :}
     ;
 
 iteration
-    ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura while con condición: "); :}
-    |   FOR OPEN_BRACKET assignment PYC condition PYC expression CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura for con asignación: " + ", condición: " + ", y expresión: "); :}
+    ::= WHILE
+        {:
+            apilar(terceto_count);
+        :}
+        OPEN_BRACKET condition:c CLOSE_BRACKET
+        {:
+            int terceto_cond = newTerceto("BF", referenceTerceto(c), "_");
+            apilar(terceto_cond);
+        :}
+        OPEN_CURLY program CLOSE_CURLY
+        {:
+            int inicio = desapilar();
+            int terceto_salto = newTerceto("BI", referenceTerceto(inicio), "_");
+            int terceto_fin = terceto_count;
+            int terceto_cond = desapilar();
+            tercetos.get(terceto_cond-1).setOperando2(referenceTerceto(terceto_fin));
+        :}
     ;
 
 condition
-    ::= comparison
-        {: System.out.println("Condición simple: "); :}
-    |   condition AND comparison
-        {: System.out.println("Condición compuesta con AND: " + " && "); :}
-    |   condition OR comparison
-        {: System.out.println("Condición compuesta con OR: " + " || "); :}
+    ::= comparison:c
+        {: 
+            RESULT = c;
+            System.out.println("Condición simple"); 
+        :}
+    |   condition:c1 AND comparison:c2
+        {:
+            int terceto = newTerceto("AND", referenceTerceto(c1), referenceTerceto(c2));
+            RESULT = terceto;
+            System.out.println("Condición AND"); 
+        :}
+    |   condition:c1 OR comparison:c2
+        {:
+            int terceto = newTerceto("OR", referenceTerceto(c1), referenceTerceto(c2));
+            RESULT = terceto;
+            System.out.println("Condición OR"); 
+        :}
     ;
 
 comparison
-    ::= expression comparator expression
-        {: System.out.println("Comparación: "); :}
-    |   NOT expression comparator expression
-        {: System.out.println("Comparación: "); :}
+    ::= expression:e1 comparator:op expression:e2
+        {:
+            String type1 = getExpressionType(e1);
+            String type2 = getExpressionType(e2);
+            if (!areTypesCompatible(type1, type2)) {
+                throw new Exception("No se pueden comparar tipos " + type1 + " y " + type2);
+            }
+            int terceto = newTerceto(op, referenceTerceto(e1), referenceTerceto(e2));
+            RESULT = terceto;
+            System.out.println("Comparación"); 
+        :}
+    |   NOT expression:e1 comparator:op expression:e2
+        {:
+            String type1 = getExpressionType(e1);
+            String type2 = getExpressionType(e2);
+            if (!areTypesCompatible(type1, type2)) {
+                throw new Exception("No se pueden comparar tipos " + type1 + " y " + type2);
+            }
+            int comp = newTerceto(op, referenceTerceto(e1), referenceTerceto(e2));
+            int terceto = newTerceto("NOT", referenceTerceto(comp), "_");
+            RESULT = terceto;
+            System.out.println("Comparación NOT"); 
+        :}
     ;
 
 comparator
@@ -205,21 +429,62 @@ comparator
     ;
 
 expression
-    ::= expression PLUS term
-        {: System.out.println("Expresión suma: "); :}
-    |   expression SUB term
-        {: System.out.println("Expresión resta: "); :}
-    |   term
-        {: System.out.println("Expresión simple: "); :}
-    |   function
-        {: System.out.println("Expresion es Funcion especial: "); :}
+    ::= expression:e1 PLUS term:t
+        {:
+            String type1 = getExpressionType(e1);
+            String type2 = getExpressionType(t);
+            if (!areTypesCompatible(type1, type2)) {
+                throw new Exception("Tipos incompatibles en la suma: " + type1 + " y " + type2);
+            }
+            int terceto = newTerceto("+", referenceTerceto(e1), referenceTerceto(t));
+            RESULT = terceto;
+            pushType(type1.equals("Float") || type2.equals("Float") ? "Float" : "Int");
+            System.out.println("Expresión suma: generando terceto"); 
+        :}
+    |   expression:e1 SUB term:t
+        {:
+            String type1 = getExpressionType(e1);
+            String type2 = getExpressionType(t);
+            if (!areTypesCompatible(type1, type2)) {
+                throw new Exception("Tipos incompatibles en la resta: " + type1 + " y " + type2);
+            }
+            int terceto = newTerceto("-", referenceTerceto(e1), referenceTerceto(t));
+            RESULT = terceto;
+            pushType(type1.equals("Float") || type2.equals("Float") ? "Float" : "Int");
+            System.out.println("Expresión resta: generando terceto"); 
+        :}
+    |   term:t
+        {:
+            RESULT = t;
+            pushType(getExpressionType(t));
+            System.out.println("Expresión simple: pasando valor"); 
+        :}
+    |   function:f
+        {:
+            RESULT = f;
+            System.out.println("Expresión es función especial"); 
+        :}
     ;
 
 function
-  ::= NEGATIVECALC OPEN_BRACKET listconst CLOSE_BRACKET
-      {: System.out.println("Regla: funcion -> negativeCalculation"); :}
-  | SUMFIRSTPRIMES OPEN_BRACKET expression CLOSE_BRACKET
-      {: System.out.println("Regla: funcion -> sumFirstPrimes"); :}
+  ::= NEGATIVECALC OPEN_BRACKET listconst:l CLOSE_BRACKET
+      {:
+          int terceto = newTerceto("NEGATIVECALC", referenceTerceto(l), "_");
+          RESULT = terceto;
+          pushType("Int");
+          System.out.println("Función NEGATIVECALC"); 
+      :}
+  | SUMFIRSTPRIMES OPEN_BRACKET expression:e CLOSE_BRACKET
+      {:
+          String type = getExpressionType(e);
+          if (!type.equals("Int")) {
+              throw new Exception("SUMFIRSTPRIMES requiere un argumento entero");
+          }
+          int terceto = newTerceto("SUMFIRSTPRIMES", referenceTerceto(e), "_");
+          RESULT = terceto;
+          pushType("Int");
+          System.out.println("Función SUMFIRSTPRIMES"); 
+      :}
   ;
 
 listconst
@@ -241,35 +506,95 @@ listexpr
     ;
 
 term
-    ::= term MULT factor
-        {: System.out.println("Término multiplicación: "); :}
-    |   term DIV factor
-        {: System.out.println("Término división: " + " / "); :}
-    |   factor
-        {: System.out.println("Término simple: "); :}
+    ::= term:t MULT factor:f
+        {:
+            String type1 = getExpressionType(t);
+            String type2 = getExpressionType(f);
+            if (!areTypesCompatible(type1, type2)) {
+                throw new Exception("Tipos incompatibles en la multiplicación: " + type1 + " y " + type2);
+            }
+            int terceto = newTerceto("*", referenceTerceto(t), referenceTerceto(f));
+            RESULT = terceto;
+            pushType(type1.equals("Float") || type2.equals("Float") ? "Float" : "Int");
+            System.out.println("Término multiplicación: generando terceto"); 
+        :}
+    |   term:t DIV factor:f
+        {:
+            String type1 = getExpressionType(t);
+            String type2 = getExpressionType(f);
+            if (!areTypesCompatible(type1, type2)) {
+                throw new Exception("Tipos incompatibles en la división: " + type1 + " y " + type2);
+            }
+            int terceto = newTerceto("/", referenceTerceto(t), referenceTerceto(f));
+            RESULT = terceto;
+            pushType("Float"); // División siempre resulta en Float
+            System.out.println("Término división: generando terceto"); 
+        :}
+    |   factor:f
+        {:
+            RESULT = f;
+            pushType(getExpressionType(f));
+            System.out.println("Término simple: pasando valor"); 
+        :}
     ;
 
 factor
-    ::= IDENTIFIER:value
+    ::= IDENTIFIER:id
         {:
-            System.out.println("Factor ID: ");
-            //currentSymbol = new SymbolTableStruct(null,null,null,0);
+            String type = getType(id.toString());
+            if (type == null) {
+                throw new Exception("Variable no declarada: " + id);
+            }
+            int terceto = newTerceto("id", id.toString(), "_");
+            RESULT = terceto;
+            System.out.println("Factor ID: generando terceto"); 
         :}
-    |   INTEGER_CONSTANT:value
+    |   INTEGER_CONSTANT:num
         {:
-            System.out.println("Factor constante entera: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Int",value,0));
+            // Validar rango del entero
+            try {
+                int value = Integer.parseInt(num.toString());
+                if (value < -32768 || value > 32767) {
+                    throw new Exception("Constante entera fuera de rango: " + value);
+                }
+            } catch (NumberFormatException e) {
+                throw new Exception("Constante entera inválida: " + num);
+            }
+            int terceto = newTerceto("cte", num.toString(), "_");
+            addSymbol("_" + num.toString(), "Int", num.toString(), 0);
+            RESULT = terceto;
+            System.out.println("Factor constante entera: generando terceto"); 
         :}
-    |   FLOAT_CONSTANT:value
+    |   FLOAT_CONSTANT:num
         {:
-            System.out.println("Factor constante flotante: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Float",value,0));
+            // Validar rango del float
+            try {
+                double value = Double.parseDouble(num.toString());
+                if (value < -3.4E+38 || value > 3.4E+38) {
+                    throw new Exception("Constante flotante fuera de rango: " + value);
+                }
+            } catch (NumberFormatException e) {
+                throw new Exception("Constante flotante inválida: " + num);
+            }
+            int terceto = newTerceto("cte", num.toString(), "_");
+            addSymbol("_" + num.toString(), "Float", num.toString(), 0);
+            RESULT = terceto;
+            System.out.println("Factor constante flotante: generando terceto"); 
         :}
-    |   STRING_CONSTANT:value
+    |   STRING_CONSTANT:str
         {:
-            System.out.println("Factor constante string: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"String",value,value.toString().length()));
+            String value = str.toString();
+            if (value.length() > 50) {
+                throw new Exception("Constante string demasiado larga: " + value);
+            }
+            int terceto = newTerceto("cte", value, "_");
+            addSymbol("_" + value, "String", value, value.length());
+            RESULT = terceto;
+            System.out.println("Factor constante string: generando terceto"); 
         :}
-    |   OPEN_BRACKET expression CLOSE_BRACKET
-        {: System.out.println("Factor expresión entre paréntesis: "); :}
+    |   OPEN_BRACKET expression:e CLOSE_BRACKET
+        {:
+            RESULT = e;
+            System.out.println("Factor expresión entre paréntesis: pasando valor"); 
+        :}
     ;
