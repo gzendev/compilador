@@ -1,115 +1,46 @@
 #+ Este es un comentario +#
 
-*- Archivo de prueba para el compilador -*
-*- Incluye todos los casos de uso y validaciones -*
-
-*- 1. Declaración de variables -*
 init {
-    a, b, c : Int
-    promedio, pi : Float
-    mensaje, nombre : String
+    a1, b1, valor1, valor2 : Float
+    variable1 : Int
+    p1, p2, p3, nombre : String
+    d, e, contador, x : Int
 }
 
-*- 2. Asignaciones simples -*
-a := 5
-b := 10
-pi := 3.14159
-mensaje := "Hola mundo"
+a1 := d*(e - 21)/4
 
-*- 3. Operaciones aritméticas -*
-c := a + b * 2
-promedio := (a + b) / 2.0
+c:=d*(e - 21)/4
 
-*- 4. Estructuras de control - IF -*
-si (a > b) {
-    mensaje := "a es mayor que b"
-} sino {
-    mensaje := "b es mayor o igual que a"
+#+ Asignaciones de valores flotantes +#
+valor1 := 99999.99
+valor1 := 99.
+valor1 := .9999
+
+#+ Asignaciones de cadenas de texto +#
+nombre := "@sdADaSjfla%dfg"
+nombre := "asldk  fh sjf"
+
+#+ Asignación de un valor entero +#
+contador := 2
+
+#+ Estructura condicional +#
+if (valor1 > valor2) {
+    write("valor1 es mayor que valor2")
+} else {
+    write("valor1 es menor o igual a valor2")
 }
 
-*- 5. Estructuras de control - WHILE -*
-mientras (c > 0) {
-    c := c - 1
-    *- While anidado -*
-    mientras (b > a) {
-        b := b - 1
-    }
+#+ Estructura de bucle WHILE +#
+while (valor1 > valor2) {
+    write("valor1 es mayor que valor2")
+    valor1 := valor1 + 1
 }
 
-*- 6. Funciones especiales -*
-*- NEGATIVECALC con lista de constantes -*
-a := negativeCalculation([1, 2.5, 3, 4.7, 5])
+#+ FUNCIONES ESPECIALES VALIDAS +#
 
-*- SUMFIRSTPRIMES con expresión -*
-b := sumFirstPrimes(c + 5)
-
-*- 7. Operadores lógicos -*
-si (a > b AND c > 0) {
-    mensaje := "Condición AND verdadera"
-}
-
-si (a > b OR c > 0) {
-    mensaje := "Condición OR verdadera"
-}
-
-si (NOT a > b) {
-    mensaje := "Condición NOT verdadera"
-}
-
-*- 8. Casos de error (comentados) -*
-
-*- Error: Variable no declarada -*
-*- x := 10 -*
-
-*- Error: Asignación de tipos incompatibles -*
-*- a := "esto es un string" -*
-*- mensaje := 42 -*
-
-*- Error: Variable ya declarada -*
-*- init {
-    a : Int    *- 'a' ya fue declarada -*
-} -*
-
-*- Error: Constante entera fuera de rango -*
-*- a := 999999999 -*
-
-*- Error: Constante flotante fuera de rango -*
-*- pi := 1.23E45 -*
-
-*- Error: Identificador demasiado largo -*
-*- esta_variable_tiene_un_nombre_demasiado_largo_que_supera_el_limite := 42 -*
-
-*- Error: String demasiado largo -*
-*- mensaje := "Este es un mensaje muy largo que supera el límite de cincuenta caracteres permitidos para strings en nuestro compilador" -*
-
-*- Error: Operación entre tipos incompatibles -*
-*- c := mensaje + a -*
-
-*- Error: Comparación entre tipos incompatibles -*
-*- si (mensaje > a) { } -*
-
-*- Error: Argumento inválido para SUMFIRSTPRIMES -*
-*- c := sumFirstPrimes(3.14) -*  *- Debe ser entero -*
-
-*- 9. Comentarios multilínea -*
-*- Este es un comentario
-   que ocupa múltiples
-   líneas en el código
-   fuente -*
-
-*- 10. Expresiones complejas -*
-a := (b + c * 2) / (4 - 1)  *- Operaciones anidadas -*
-promedio := (a + b + c) / 3.0  *- Conversión implícita a float -*
-
-*- 11. Anidamiento de estructuras de control -*
-si (a > 0) {
-    mientras (b > 0) {
-        si (c > 0) {
-            c := c - 1
-        } sino {
-            b := b - 1
-        }
-    }
-} sino {
-    a := 1
-}
+x := negativeCalculation(-2.0, -3.0, -1.0)         #+ 3 negativos -> multiplicar: -2*-3*-1 = -6.0 +#
+x := negativeCalculation(-5.5, -1.5)               #+ 2 negativos -> sumar: -7.0 +#
+x := negativeCalculation(4.0, -2.0, -1.0)          #+ 2 negativos -> sumar: -3.0 +#
+x := negativeCalculation(3.0, 4.0)                 #+ sin negativos -> resultado = 0 o neutro, según implementación +#
+x := sumFirstPrimes(5)                             #+ 2+3+5+7+11 = 28 +#
+x := sumFirstPrimes(0)                             #+ suma de cero primos = 0 +#

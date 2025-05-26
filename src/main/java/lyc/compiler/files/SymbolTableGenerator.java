@@ -1,26 +1,40 @@
 package lyc.compiler.files;
 
+import lyc.compiler.Lexer;
+import lyc.compiler.Parser;
+import lyc.compiler.model.SymbolTableStruct;
+import lyc.compiler.utils.StringUtil;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import lyc.compiler.model.SymbolTableEntry;
 
-public class SymbolTableGenerator implements FileGenerator {
-    private List<SymbolTableEntry> symbolTable;
+public class SymbolTableGenerator implements FileGenerator{
 
-    public SymbolTableGenerator(List<SymbolTableEntry> symbolTable) {
-        this.symbolTable = symbolTable;
+    Parser parser;
+    Lexer lexer;
+    private static final List<String> TABLE_HEADER = Arrays.asList("NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
+
+
+    public SymbolTableGenerator(Lexer lexer) {
+        this.lexer = lexer;
+    }
+
+    public SymbolTableGenerator(Parser parser) {
+        this.parser = parser;
     }
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
-        // Escribir encabezado
-        fileWriter.write(String.format("%-30s|%-15s|%-30s|%-10s\n", "NOMBRE", "TIPO", "VALOR", "LONGITUD"));
-        fileWriter.write("-".repeat(85) + "\n");
-        
-        // Escribir entradas
-        for (SymbolTableEntry entry : symbolTable) {
-            fileWriter.write(entry.toString() + "\n");
+        for(String s :TABLE_HEADER) {
+            fileWriter.write(StringUtil.centrarString(s));
         }
+        fileWriter.write("\n");
+        for (SymbolTableStruct s :lexer.symbolList) {
+            if(s != null) {
+                fileWriter.write(s.toString().concat("\n"));
+            }
+        }
+
     }
 }
