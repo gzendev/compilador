@@ -14,7 +14,7 @@ public class ParserTest {
 
     @Test
     public void assignmentWithExpression() throws Exception {
-        compilationSuccessful("c:=d*(e - 21)/4");
+        compilationSuccessful("init{\n  c : Int\n  d : Int\n  e : Int\n}\n\nc:=d*(e - 21)/4");
     }
 
     @Test

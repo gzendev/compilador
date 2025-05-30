@@ -73,7 +73,7 @@ WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 IntegerConstant = [-]?{Digit}+
 StringConstant = {DoubleQuote}({Letter}|{Digit}|{WhiteSpace}|{Arroba}|{Percent})+{DoubleQuote}
-FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
+FloatConstants = [-]?{Digit}+[.]{Digit}+([eE][-+]?{Digit}+)? | [.]{Digit}+ | {Digit}+[.] | [-]?{Digit}+[eE][-+]?{Digit}+
 
 %%
 
@@ -109,7 +109,7 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   {IntegerConstant} {
       try {
           int value = Integer.parseInt(yytext());
-          if (value < INT_MIN || value > INT_MAX) {
+          if (value < -32768 || value > 32767) {
               throw new InvalidIntegerException("Integer constant out of 16-bit range: " + yytext());
           }
       } catch (NumberFormatException e) {
@@ -121,9 +121,9 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   }
   {FloatConstants} {
       try {
-          float value = Float.parseFloat(yytext());
-          if (value < FLT_MIN || value > FLT_MAX) {
-            throw new InvalidFloatException("Float constant out of 32-bit range: " + yytext());
+          double value = Double.parseDouble(yytext());
+          if (value < -3.40282347e+38 || value > 3.40282347e+38) {
+              throw new InvalidFloatException("Float constant out of range: " + yytext());
           }
       } catch (NumberFormatException e) {
           throw new InvalidFloatException("Invalid float constant: " + yytext());

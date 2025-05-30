@@ -1,1 +1,5 @@
+init{
+  x : Int
+}
+
 x := sumFirstPrimes(5 + 3)

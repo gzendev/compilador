@@ -44,3 +44,44 @@ x := negativeCalculation(4.0, -2.0, -1.0)          #+ 2 negativos -> sumar: -3.0
 x := negativeCalculation(3.0, 4.0)                 #+ sin negativos -> resultado = 0 o neutro, según implementación +#
 x := sumFirstPrimes(5)                             #+ 2+3+5+7+11 = 28 +#
 x := sumFirstPrimes(0)                             #+ suma de cero primos = 0 +#
+
+#+ Casos de error y pruebas adicionales +#
+
+#-- Declaración repetida de variable (debe dar error) --#
+# init { a1 : Float a1 : Int } #
+
+#-- Asignación a variable no declarada (debe dar error) --#
+# noDeclarada := 5 #
+
+#-- Asignación de tipo incorrecto (debe dar error) --#
+# variable1 := "texto" #
+# nombre := 123 #
+
+#-- Asignación de valor fuera de rango (debe dar error) --#
+# variable1 := 40000 #
+# variable1 := -40000 #
+
+#-- Uso de variable no inicializada (debe dar error) --#
+# x := y + 1 #
+
+#-- Expresiones con paréntesis anidados --#
+variable1 := (2 + (3 * (4 - 1)))
+
+#-- Operadores lógicos AND, OR, NOT --#
+if (contador > 0 AND valor1 > 0) {
+    write("Ambos son positivos")
+}
+if (contador > 0 OR valor1 < 0) {
+    write("Al menos uno cumple")
+}
+if (NOT contador > 0) {
+    write("Contador no es positivo")
+}
+
+#-- Lectura y escritura --#
+read(variable1)
+write(variable1)
+
+#-- Comentarios en distintas posiciones --#
+# Esto es un comentario al inicio de línea
+variable1 := 10 # comentario al final de línea

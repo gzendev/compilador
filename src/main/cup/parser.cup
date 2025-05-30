@@ -1,11 +1,16 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
+import lyc.compiler.tercetos.GeneradorTercetos;
+import lyc.compiler.model.SymbolTable;
+import lyc.compiler.model.SemanticException;
 
 class Parser;
 
 parser code
 {:
+	public GeneradorTercetos generadorTercetos = new GeneradorTercetos();
+	public SymbolTable symbolTable = new SymbolTable();
 	//SymbolTableStruct currentSymbol;
 	//public List<SymbolTableStruct> symbolList = new ArrayList();
 :};
@@ -105,18 +110,51 @@ listdec
     ;
 
 sentdec
-    ::= listid DOS_PUNTOS INT
-        {: System.out.println("Lista de variables enteras: "); :}
-    |   listid DOS_PUNTOS FLOAT
-        {: System.out.println("Lista de variables flotantes: "); :}
-    |   listid DOS_PUNTOS STRING
-        {: System.out.println("Lista de variables strings: "); :}
+    ::= listid:ids DOS_PUNTOS INT
+        {:
+            try {
+                if (ids instanceof String) {
+                    symbolTable.addVariable((String)ids, "int");
+                }
+                System.out.println("Lista de variables enteras: ");
+            } catch (SemanticException e) {
+                throw new RuntimeException(e);
+            }
+        :}
+    |   listid:ids DOS_PUNTOS FLOAT
+        {:
+            try {
+                if (ids instanceof String) {
+                    symbolTable.addVariable((String)ids, "float");
+                }
+                System.out.println("Lista de variables flotantes: ");
+            } catch (SemanticException e) {
+                throw new RuntimeException(e);
+            }
+        :}
+    |   listid:ids DOS_PUNTOS STRING
+        {:
+            try {
+                if (ids instanceof String) {
+                    symbolTable.addVariable((String)ids, "string");
+                }
+                System.out.println("Lista de variables strings: ");
+            } catch (SemanticException e) {
+                throw new RuntimeException(e);
+            }
+        :}
     ;
 
 listid
-    ::= listid COMA IDENTIFIER
-        {: System.out.println("Lista de IDs: "); :}
-    |   IDENTIFIER:ident
+    ::= listid:list COMA IDENTIFIER:id
+        {: 
+            System.out.println("Lista de IDs: ");
+            RESULT = list;
+        :}
+    |   IDENTIFIER:id
+        {: 
+            RESULT = id;
+        :}
     ;
 
 program
@@ -157,70 +195,147 @@ output
     ;
 
 assignment
-    ::= listid ASSIG expression
-        {: System.out.println("Lista de asignacion de variables: "); :}
+    ::= IDENTIFIER:id ASSIG expression:expr
+        {:
+            try {
+                String type = symbolTable.getType(id.toString());
+                symbolTable.assignValue(id.toString(), expr);
+                generadorTercetos.apilar(id.toString());
+                generadorTercetos.crearTercetoAsignacion();
+                System.out.println("Asignación: " + id + " = " + expr);
+            } catch (SemanticException e) {
+                throw new RuntimeException(e);
+            }
+        :}
     ;
 
 selection
-    ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura if con condición: "); :}
-    |   IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY ELSE OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura if-else con condición: "); :}
+    ::= IF OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY program:prog CLOSE_CURLY
+        {:
+            // El terceto de comparación ya fue creado por la regla condition
+            String etiquetaFalso = "[" + generadorTercetos.getIndiceActual() + "]";
+            generadorTercetos.crearTercetoBranch("BF", etiquetaFalso); // Branch if false
+        :}
+    |   IF OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY program:prog1 CLOSE_CURLY ELSE OPEN_CURLY program:prog2 CLOSE_CURLY
+        {:
+            // El terceto de comparación ya fue creado por la regla condition
+            int indiceActual = generadorTercetos.getIndiceActual();
+            String etiquetaElse = "[" + indiceActual + "]";
+            generadorTercetos.crearTercetoBranch("BF", etiquetaElse); // Branch if false al else
+            // Después del bloque if, saltar al final
+            String etiquetaFin = "[" + (indiceActual + 1) + "]";
+            generadorTercetos.crearTercetoBranch("BI", etiquetaFin); // Branch incondicional al fin
+        :}
     ;
 
 iteration
-    ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura while con condición: "); :}
-    |   FOR OPEN_BRACKET assignment PYC condition PYC expression CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura for con asignación: " + ", condición: " + ", y expresión: "); :}
+    ::= WHILE OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY program:prog CLOSE_CURLY
+        {:
+            String etiquetaInicio = "[" + (generadorTercetos.getIndiceActual() - 1) + "]";
+            String etiquetaFin = "[" + generadorTercetos.getIndiceActual() + "]";
+            generadorTercetos.crearTercetoBranch("BF", etiquetaFin); // Branch if false al fin
+            generadorTercetos.crearTercetoBranch("BI", etiquetaInicio); // Branch incondicional al inicio
+        :}
+    |   FOR OPEN_BRACKET assignment:init PYC condition:cond PYC expression:step CLOSE_BRACKET OPEN_CURLY program:prog CLOSE_CURLY
+        {:
+            String etiquetaInicio = "[" + (generadorTercetos.getIndiceActual() - 1) + "]";
+            String etiquetaFin = "[" + generadorTercetos.getIndiceActual() + "]";
+            generadorTercetos.crearTercetoBranch("BF", etiquetaFin);
+            // Generar el paso del for
+            generadorTercetos.crearTercetoBranch("BI", etiquetaInicio);
+        :}
     ;
 
 condition
-    ::= comparison
-        {: System.out.println("Condición simple: "); :}
-    |   condition AND comparison
-        {: System.out.println("Condición compuesta con AND: " + " && "); :}
-    |   condition OR comparison
-        {: System.out.println("Condición compuesta con OR: " + " || "); :}
+    ::= comparison:comp
+        {: RESULT = comp; :}
+    |   condition:c1 AND comparison:c2
+        {:
+            generadorTercetos.crearTercetoOperacion("AND");
+        :}
+    |   condition:c1 OR comparison:c2
+        {:
+            generadorTercetos.crearTercetoOperacion("OR");
+        :}
     ;
 
 comparison
-    ::= expression comparator expression
-        {: System.out.println("Comparación: "); :}
-    |   NOT expression comparator expression
-        {: System.out.println("Comparación: "); :}
+    ::= expression:e1 comparator:comp expression:e2
+        {:
+            generadorTercetos.crearTercetoComparacion(comp.toString());
+        :}
+    |   NOT expression:e1 comparator:comp expression:e2
+        {:
+            generadorTercetos.crearTercetoComparacion("NOT" + comp.toString());
+        :}
     ;
 
 comparator
-    ::= OP_MAYIG
-        {: System.out.println("Comparador >= "); :}
-    |   OP_MENIG
-        {: System.out.println("Comparador <= "); :}
-    |   OP_MAY
-        {: System.out.println("Comparador > "); :}
-    |   OP_MEN
-        {: System.out.println("Comparador < "); :}
-    |   OP_IG
-        {: System.out.println("Comparador == "); :}
+    ::= OP_MAYIG    {: RESULT = ">="; :}
+    |   OP_MENIG    {: RESULT = "<="; :}
+    |   OP_MAY      {: RESULT = ">"; :}
+    |   OP_MEN      {: RESULT = "<"; :}
+    |   OP_IG       {: RESULT = "=="; :}
     ;
 
 expression
-    ::= expression PLUS term
-        {: System.out.println("Expresión suma: "); :}
-    |   expression SUB term
-        {: System.out.println("Expresión resta: "); :}
-    |   term
-        {: System.out.println("Expresión simple: "); :}
-    |   function
-        {: System.out.println("Expresion es Funcion especial: "); :}
+    ::= expression:e1 PLUS term:t
+        {:
+            generadorTercetos.crearTercetoOperacion("+");
+            System.out.println("Expresión suma: " + e1 + " + " + t);
+            if (e1 instanceof Number && t instanceof Number) {
+                if (e1 instanceof Double || t instanceof Double) {
+                    RESULT = ((Number)e1).doubleValue() + ((Number)t).doubleValue();
+                } else {
+                    RESULT = ((Number)e1).intValue() + ((Number)t).intValue();
+                }
+            } else {
+                RESULT = e1;
+            }
+        :}
+    |   expression:e1 SUB term:t
+        {:
+            generadorTercetos.crearTercetoOperacion("-");
+            System.out.println("Expresión resta: " + e1 + " - " + t);
+            if (e1 instanceof Number && t instanceof Number) {
+                if (e1 instanceof Double || t instanceof Double) {
+                    RESULT = ((Number)e1).doubleValue() - ((Number)t).doubleValue();
+                } else {
+                    RESULT = ((Number)e1).intValue() - ((Number)t).intValue();
+                }
+            } else {
+                RESULT = e1;
+            }
+        :}
+    |   term:t
+        {: 
+            RESULT = t;
+        :}
+    |   function:f
+        {: 
+            System.out.println("Expresion es Funcion especial: ");
+            RESULT = f;
+        :}
     ;
 
 function
-  ::= NEGATIVECALC OPEN_BRACKET listconst CLOSE_BRACKET
-      {: System.out.println("Regla: funcion -> negativeCalculation"); :}
-  | SUMFIRSTPRIMES OPEN_BRACKET expression CLOSE_BRACKET
-      {: System.out.println("Regla: funcion -> sumFirstPrimes"); :}
-  ;
+    ::= NEGATIVECALC OPEN_BRACKET listconst CLOSE_BRACKET
+        {: 
+            System.out.println("Regla: funcion -> negativeCalculation");
+            RESULT = 0; // Temporal hasta implementar la función
+        :}
+    |   SUMFIRSTPRIMES OPEN_BRACKET expression:e CLOSE_BRACKET
+        {: 
+            System.out.println("Regla: funcion -> sumFirstPrimes");
+            if (e instanceof Number) {
+                int n = ((Number)e).intValue();
+                // Aquí implementar la lógica de sumFirstPrimes
+                RESULT = n; // Temporal hasta implementar la función
+            } else {
+                RESULT = 0;
+            }
+        :}
+    ;
 
 listconst
     ::= listconst COMA INTEGER_CONSTANT
@@ -234,42 +349,82 @@ listconst
     ;
 
 listexpr
-    ::= listexpr COMA expression
-        {: System.out.println("Componente de lista: expresion "); :}
-    |   expression
-        {: System.out.println("Expresion: "); :}
+    ::= listexpr:list COMA expression:expr
+        {: 
+            System.out.println("Componente de lista: expresion ");
+            RESULT = list;
+        :}
+    |   expression:expr
+        {: 
+            System.out.println("Expresion: ");
+            RESULT = expr;
+        :}
     ;
 
 term
-    ::= term MULT factor
-        {: System.out.println("Término multiplicación: "); :}
-    |   term DIV factor
-        {: System.out.println("Término división: " + " / "); :}
-    |   factor
-        {: System.out.println("Término simple: "); :}
+    ::= term:t MULT factor:f
+        {:
+            generadorTercetos.crearTercetoOperacion("*");
+            System.out.println("Término multiplicación: " + t + " * " + f);
+            if (t instanceof Number && f instanceof Number) {
+                if (t instanceof Double || f instanceof Double) {
+                    RESULT = ((Number)t).doubleValue() * ((Number)f).doubleValue();
+                } else {
+                    RESULT = ((Number)t).intValue() * ((Number)f).intValue();
+                }
+            } else {
+                RESULT = t;
+            }
+        :}
+    |   term:t DIV factor:f
+        {:
+            generadorTercetos.crearTercetoOperacion("/");
+            System.out.println("Término división: " + t + " / " + f);
+            if (t instanceof Number && f instanceof Number) {
+                if (t instanceof Double || f instanceof Double) {
+                    RESULT = ((Number)t).doubleValue() / ((Number)f).doubleValue();
+                } else {
+                    RESULT = ((Number)t).intValue() / ((Number)f).intValue();
+                }
+            } else {
+                RESULT = t;
+            }
+        :}
+    |   factor:f
+        {: 
+            RESULT = f;
+        :}
     ;
 
 factor
-    ::= IDENTIFIER:value
+    ::= IDENTIFIER:id
         {:
-            System.out.println("Factor ID: ");
-            //currentSymbol = new SymbolTableStruct(null,null,null,0);
+            try {
+                String type = symbolTable.getType(id.toString());
+                generadorTercetos.apilar(id.toString());
+                // Return the variable name as is, don't try to convert it
+                RESULT = id.toString();
+            } catch (SemanticException e) {
+                throw new RuntimeException(e);
+            }
         :}
-    |   INTEGER_CONSTANT:value
+    |   INTEGER_CONSTANT:num
         {:
-            System.out.println("Factor constante entera: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Int",value,0));
+            generadorTercetos.apilar(num.toString());
+            RESULT = Integer.parseInt(num.toString());
         :}
-    |   FLOAT_CONSTANT:value
+    |   FLOAT_CONSTANT:num
         {:
-            System.out.println("Factor constante flotante: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Float",value,0));
+            generadorTercetos.apilar(num.toString());
+            RESULT = Double.parseDouble(num.toString());
         :}
-    |   STRING_CONSTANT:value
+    |   STRING_CONSTANT:str
         {:
-            System.out.println("Factor constante string: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"String",value,value.toString().length()));
+            generadorTercetos.apilar(str.toString());
+            RESULT = str.toString();
         :}
-    |   OPEN_BRACKET expression CLOSE_BRACKET
-        {: System.out.println("Factor expresión entre paréntesis: "); :}
+    |   OPEN_BRACKET expression:e CLOSE_BRACKET
+        {: 
+            RESULT = e;
+        :}
     ;
