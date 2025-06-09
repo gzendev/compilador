@@ -4,8 +4,7 @@ import java_cup.runtime.Symbol;
 import lyc.compiler.ParserSym;
 import lyc.compiler.model.*;
 import static lyc.compiler.constants.Constants.*;
-import java.util.List;
-import java.util.ArrayList;
+import java.math.BigInteger;
 
 %%
 
@@ -28,16 +27,6 @@ import java.util.ArrayList;
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline, yycolumn, value);
   }
-
-  public SymbolTableStruct currentSymbol;
-  public List<SymbolTableStruct> symbolList = new ArrayList();
-
-
-  private void addToSymbolListIfNotExists(SymbolTableStruct symbol){
-  		if(!symbolList.contains(symbol))
-  			symbolList.add(symbol);
-  }
-
 %}
 
 
@@ -63,6 +52,7 @@ Op_may = ">"
 Distinct  = "!="
 Coma = ","
 DosPuntos = ":"
+Point = "."
 
 Letter = [a-zA-Z]
 Digit = [0-9]
@@ -71,9 +61,9 @@ Arroba = "@"
 Percent = "%"
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
-IntegerConstant = [-]?{Digit}+
+IntegerConstant = {Digit}+
 StringConstant = {DoubleQuote}({Letter}|{Digit}|{WhiteSpace}|{Arroba}|{Percent})+{DoubleQuote}
-FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
+FloatConstant = ({Digit}+{Point}{Digit}* | {Digit}*{Point}{Digit}+)
 
 %%
 
@@ -92,54 +82,68 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
 <YYINITIAL> "String"    { System.out.println("Token: " + yytext() + " | Tipo: STRING"); return symbol(ParserSym.STRING); }
 <YYINITIAL> "read"      { System.out.println("Token: " + yytext() + " | Tipo: READ"); return symbol(ParserSym.READ); }
 <YYINITIAL> "write"     { System.out.println("Token: " + yytext() + " | Tipo: WRITE"); return symbol(ParserSym.WRITE); }
-<YYINITIAL> "negativeCalculation" { System.out.println("Token: " + yytext() + " | Tipo: NEGATIVECALC"); return symbol(ParserSym.NEGATIVECALC); }
-<YYINITIAL> "sumFirstPrimes"      { System.out.println("Token: " + yytext() + " | Tipo: SUMFIRSTPRIMES"); return symbol(ParserSym.SUMFIRSTPRIMES); }
+<YYINITIAL> "negativeCalculation" { System.out.println("Token: " + yytext() + " | Tipo: NEGATIVE_CALC"); return symbol(ParserSym.NEGATIVE_CALC); }
+<YYINITIAL> "sumFirstPrimes"      { System.out.println("Token: " + yytext() + " | Tipo: SUM_FIRST_PRIMES"); return symbol(ParserSym.SUM_FIRST_PRIMES); }
 
 <YYINITIAL> {
-  /* identifiers */
-  {Identifier} {
-      if (yytext().length() > 50) {
-        throw new InvalidLengthException("Identifier too long: " + yytext());
-      }
-      System.out.println("Token: " + yytext() + " | Tipo: IDENTIFIER");
-      addToSymbolListIfNotExists(new SymbolTableStruct("_".concat(yytext()), null, null, 0));
-      return symbol(ParserSym.IDENTIFIER, yytext());
-  }
-  /* Constants */
-  {IntegerConstant} {
-      try {
-          int value = Integer.parseInt(yytext());
-          if (value < INT_MIN || value > INT_MAX) {
-              throw new InvalidIntegerException("Integer constant out of 16-bit range: " + yytext());
-          }
-      } catch (NumberFormatException e) {
-          throw new InvalidIntegerException("Invalid integer constant: " + yytext());
-      }
-      System.out.println("Token: " + yytext() + " | Tipo: INTEGER_CONSTANT");
-      addToSymbolListIfNotExists(new SymbolTableStruct("_".concat(yytext()), "Int", yytext(), 0));
-      return symbol(ParserSym.INTEGER_CONSTANT, yytext());
-  }
-  {FloatConstants} {
-      try {
-          float value = Float.parseFloat(yytext());
-          if (value < FLT_MIN || value > FLT_MAX) {
-            throw new InvalidFloatException("Float constant out of 32-bit range: " + yytext());
-          }
-      } catch (NumberFormatException e) {
-          throw new InvalidFloatException("Invalid float constant: " + yytext());
-      }
-      System.out.println("Token: " + yytext() + " | Tipo: FLOAT_CONSTANT");
-      addToSymbolListIfNotExists(new SymbolTableStruct("_".concat(yytext()), "Float", yytext(), 0));
-      return symbol(ParserSym.FLOAT_CONSTANT, yytext());
-  }
-  {StringConstant} {
-      if (yytext().length() > STR_MAX) {
-        throw new InvalidLengthException("String constant too long: " + yytext());
-      }
-      System.out.println("Token: " + yytext() + " | Tipo: STRING_CONSTANT");
-      addToSymbolListIfNotExists(new SymbolTableStruct("_".concat(yytext()), "String", yytext(), yytext().length()));
-      return symbol(ParserSym.STRING_CONSTANT, yytext());
-  }
+  {StringConstant}                          {
+                                                  String stringValue = yytext().substring(1, yytext().length() - 1); // Remueve las comillas
+                                                  if (stringValue.length() <= STRING_RANGE) {
+                                                      return symbol(ParserSym.STRING_CONSTANT, stringValue);
+                                                  } else {
+                                                      throw new InvalidLengthException("La constante de cadena [" + stringValue + "] excede los " + STRING_RANGE + " caracteres permitidos.");
+                                                  }
+                                              }
+    /* identifiers */
+    {Identifier}                              {
+                                                  String stringValue = new String(yytext());
+                                                  if (stringValue.length() <= MAX_LENGTH) {
+                                                      return symbol(ParserSym.IDENTIFIER, yytext());
+                                                  } else {
+                                                      throw new InvalidLengthException("La constante de cadena [" + stringValue + "] excede los " + STRING_RANGE + " caracteres permitidos.");
+                                                  }
+                                              }
+    /* Constants */
+    {IntegerConstant}                         {
+                                                  BigInteger intValue = new BigInteger(yytext());
+                                                  //BigInteger minValue = BigInteger.valueOf(-(1L << (BITS_INT - 1))); // Calcula el valor mínimo permitido
+                                                  BigInteger minValue = BigInteger.valueOf(0);
+                                                  //BigInteger maxValue = BigInteger.valueOf((1L << (BITS_INT - 1)) - 1); // Calcula el valor máximo permitido
+                                                  BigInteger maxValue = BigInteger.valueOf((1L << BITS_INT) - 1); // Calcula el valor máximo permitido
+
+                                                  if (intValue.compareTo(minValue) >= 0 && intValue.compareTo(maxValue) <= 0) {
+                                                      return symbol(ParserSym.INTEGER_CONSTANT, yytext());
+                                                  } else {
+                                                      String errorMessage;
+                                                      if (intValue.compareTo(minValue) < 0) {
+                                                          errorMessage = "La constante [" + yytext() + "] esta por debajo del limite de los enteros.";
+                                                      } else {
+                                                          errorMessage = "La constante [" + yytext() + "] esta por encima del limite de los enteros.";
+                                                      }
+                                                      throw new InvalidIntegerException(errorMessage);
+                                                  }
+                                              }
+    {FloatConstant}                           {
+                                                  double floatValue = Double.parseDouble(yytext());
+                                                  //long minValue = (long) -Math.pow(2, BITS_FLOAT - 1); // Límite mínimo para flotante
+                                                  long minValue = 0;
+                                                  //long maxValue = (long) Math.pow(2, BITS_FLOAT - 1) - 1; // Límite máximo para flotante
+                                                  long maxValue = (long) Math.pow(2, BITS_FLOAT) - 1; // Límite máximo para flotante
+
+                                                  System.out.println("floatValue: " + floatValue);
+                                                  System.out.println("maxValue: " + maxValue);
+                                                  if (floatValue >= minValue && floatValue <= maxValue) {
+                                                      return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+                                                  } else {
+                                                      String errorMessage;
+                                                      if (floatValue < minValue) {
+                                                          errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes.";
+                                                      } else {
+                                                          errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes.";
+                                                      }
+                                                      throw new InvalidFloatException(errorMessage);
+                                                  }
+                                              }
 
   /* operators */
   {Plus}                                    { System.out.println("Token: " + yytext() + " | Tipo: PLUS"); return symbol(ParserSym.PLUS); }
@@ -157,6 +161,7 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   {Op_may}                                  { System.out.println("Token: " + yytext() + " | Tipo: OP_MAY"); return symbol(ParserSym.OP_MAY); }
   {Semicolon}                               { System.out.println("Token: " + yytext() + " | Tipo: PYC"); return symbol(ParserSym.PYC); }
   {Coma}                                    { System.out.println("Token: " + yytext() + " | Tipo: COMA"); return symbol(ParserSym.COMA); }
+  {Point}                                   { return symbol(ParserSym.POINT); }
   {DosPuntos}                               { System.out.println("Token: " + yytext() + " | Tipo: DOS_PUNTOS"); return symbol(ParserSym.DOS_PUNTOS); }
 
   /* whitespace */
@@ -164,7 +169,6 @@ FloatConstants = [-]?{Digit}+[.]{Digit}+ | [.]{Digit}+ | {Digit}+[.]
   {Comment} 				                { /* ignore */ }
 
 }
-
 
 /* error fallback */
 [^]                              { throw new UnknownCharacterException(yytext()); }

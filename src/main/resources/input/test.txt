@@ -1,10 +1,10 @@
 #+ Este es un comentario +#
 
 init {
-    a1, b1, valor1, valor2 : Float
+    x, c, a1, b1, valor1, valor2 : Float
     variable1 : Int
     p1, p2, p3, nombre : String
-    d, e, contador, x : Int
+    d, e, contador : Int
 }
 
 a1 := d*(e - 21)/4

@@ -1,18 +1,19 @@
 package lyc.compiler.main;
 
-import lyc.compiler.Lexer;
 import lyc.compiler.Parser;
 import lyc.compiler.factories.FileFactory;
-import lyc.compiler.factories.LexerFactory;
 import lyc.compiler.factories.ParserFactory;
 import lyc.compiler.files.FileOutputWriter;
+import lyc.compiler.files.IntermediateCodeGenerator;
 import lyc.compiler.files.SymbolTableGenerator;
+
 import java.io.IOException;
 import java.io.Reader;
 
 public final class Compiler {
 
-    private Compiler(){}
+    private Compiler() {
+    }
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -21,10 +22,10 @@ public final class Compiler {
         }
 
         try (Reader reader = FileFactory.create(args[0])) {
-            Lexer lexer = LexerFactory.create(reader);
-            Parser parser = ParserFactory.create(lexer);
+            Parser parser = ParserFactory.create(reader);
             parser.parse();
-            FileOutputWriter.writeOutput("symbol-table.txt", new SymbolTableGenerator(lexer));
+            FileOutputWriter.writeOutput("symbol-table.txt", new SymbolTableGenerator(parser.getSymbolsList()));
+            FileOutputWriter.writeOutput("intermediate-code.txt", new IntermediateCodeGenerator(parser.getTercetosList()));
         } catch (IOException e) {
             System.err.println("There was an error trying to read input file " + e.getMessage());
             System.exit(0);

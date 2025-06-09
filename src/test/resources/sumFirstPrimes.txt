@@ -1,1 +1,4 @@
-x := sumFirstPrimes(5 + 3)
+init {
+    x : Float
+}
+x := sumFirstPrimes(5)

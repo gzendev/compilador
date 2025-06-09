@@ -1,6 +1,7 @@
 package lyc.compiler.model;
 
 import lyc.compiler.utils.StringUtil;
+
 import java.util.Objects;
 
 public class SymbolTableStruct {

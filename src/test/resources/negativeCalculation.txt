@@ -1,1 +1,5 @@
-x := negativeCalculation(1, 2, 3)
+init {
+    x : Float
+}
+
+x := negativeCalculation(-2.0, -3.0, -1.0)

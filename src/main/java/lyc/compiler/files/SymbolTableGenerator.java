@@ -1,40 +1,42 @@
 package lyc.compiler.files;
 
-import lyc.compiler.Lexer;
-import lyc.compiler.Parser;
-import lyc.compiler.model.SymbolTableStruct;
-import lyc.compiler.utils.StringUtil;
+import lyc.compiler.symboltable.Symbol;
+
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class SymbolTableGenerator implements FileGenerator{
+public class SymbolTableGenerator implements FileGenerator {
 
-    Parser parser;
-    Lexer lexer;
-    private static final List<String> TABLE_HEADER = Arrays.asList("NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
+    private List<Symbol> symbolsList;
 
-
-    public SymbolTableGenerator(Lexer lexer) {
-        this.lexer = lexer;
+    public SymbolTableGenerator() {
+        this.symbolsList = Collections.emptyList();
     }
 
-    public SymbolTableGenerator(Parser parser) {
-        this.parser = parser;
+    public SymbolTableGenerator(List<Symbol> symbols) {
+        this.symbolsList = symbols;
     }
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
-        for(String s :TABLE_HEADER) {
-            fileWriter.write(StringUtil.centrarString(s));
-        }
-        fileWriter.write("\n");
-        for (SymbolTableStruct s :lexer.symbolList) {
-            if(s != null) {
-                fileWriter.write(s.toString().concat("\n"));
+        try {
+            if (this.symbolsList.isEmpty()) {
+                fileWriter.write("SIN SIMBOLOS");
+                return;
             }
-        }
 
+            fileWriter.write(String.format("%-20s|%-20s|%-20s|%-20s", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD") + "\n");
+            symbolsList.forEach(symbol -> {
+                try {
+                    fileWriter.write(symbol.toString() + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

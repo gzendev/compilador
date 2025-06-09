@@ -22,7 +22,7 @@ public class StringUtil {
         for (int i = 0; i < espaciosDerecha; i++) {
             sb.append(' ');
         }
-        while(sb.length() < 60) {
+        while (sb.length() < 60) {
             sb.append(' ');
         }
         return sb.toString();

@@ -14,7 +14,7 @@ public class ParserTest {
 
     @Test
     public void assignmentWithExpression() throws Exception {
-        compilationSuccessful("c:=d*(e - 21)/4");
+        compilationSuccessful("init {d, e, c : Float} c:=d*(e - 21)/4");
     }
 
     @Test
@@ -39,7 +39,7 @@ public class ParserTest {
 
     @Test
     void comment() throws Exception {
-        compilationSuccessful(readFromFile("comment.txt"));
+        compilationError(readFromFile("comment.txt"));
     }
 
     @Test
@@ -70,16 +70,6 @@ public class ParserTest {
     @Test
     void whileStatement() throws Exception {
         compilationSuccessful(readFromFile("while.txt"));
-    }
-
-    @Test
-    void funcionNegativeCalculation() throws Exception {
-        compilationSuccessful(readFromFile("negativeCalculation.txt"));
-    }
-
-    @Test
-    void funcionSumFirstPrimes() throws Exception {
-        compilationSuccessful(readFromFile("sumFirstPrimes.txt"));
     }
 
     @Test

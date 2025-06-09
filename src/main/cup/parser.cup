@@ -1,14 +1,220 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
+import lyc.compiler.symboltable.*;
+import lyc.compiler.symboltable.Symbol;
+import java.util.List;
+import java.util.ArrayList;
+import lyc.compiler.terceto.*;
 
 class Parser;
 
+action code
+{:
+     public SymbolTableManager symbolTableManager = new SymbolTableManager();
+     public ArrayList<String> varsList = new ArrayList();
+     public IntermediateCodeManager intCodeManager = new IntermediateCodeManager();
+     public String blockCondition = "IF";
+:}
 parser code
 {:
-	//SymbolTableStruct currentSymbol;
-	//public List<SymbolTableStruct> symbolList = new ArrayList();
-:};
+    public List<Symbol> getSymbolsList() {
+        return action_obj.symbolTableManager.getSymbolsList();
+    }
+
+    public List<Terceto> getTercetosList() {
+        return action_obj.intCodeManager.getTercetosList();
+    }
+
+    public Integer crearTerceto(String operador, String operando1, String operando2)
+    {
+        return action_obj.intCodeManager.crearTerceto(operador, operando1, operando2);
+    }
+
+    public Integer crearTerceto(String valor)
+    {
+        return action_obj.intCodeManager.crearTerceto(valor);
+    }
+
+    public Integer crearTerceto(String operacion, String operando1)
+    {
+        return action_obj.intCodeManager.crearTerceto(operacion, operando1);
+    }
+
+    public void setPunteroTerceto(String puntero, Integer numeroTerceto)
+    {
+        action_obj.intCodeManager.setPunteroTerceto(puntero, numeroTerceto);
+    }
+
+    public Integer getNumeroTercetoFromPuntero(String puntero)
+    {
+        return action_obj.intCodeManager.getNumeroTercetoFromPuntero(puntero);
+    }
+
+    public String getStrNumeroTercetoFromPuntero(String puntero)
+    {
+        return action_obj.intCodeManager.getStrNumeroTercetoFromPuntero(puntero);
+    }
+
+    public void apilarPuntero(Integer puntero)
+    {
+        action_obj.intCodeManager.apilarPuntero(puntero);
+    }
+
+    public Integer desapilarPuntero()
+    {
+        return action_obj.intCodeManager.desapilarPuntero();
+    }
+
+    public void apilarLexema(String lexema)
+    {
+        action_obj.intCodeManager.apilarLexema(lexema);
+    }
+
+    public String desapilarLexema()
+    {
+        return action_obj.intCodeManager.desapilarLexema();
+    }
+
+    public void apilarComparador(String comparador)
+    {
+        action_obj.intCodeManager.apilarComparador(comparador);
+    }
+
+    public String desapilarComparador()
+    {
+        return action_obj.intCodeManager.desapilarComparador();
+    }
+
+    public Integer getUltimoNumeroTerceto()
+    {
+        return action_obj.intCodeManager.getUltimoNumeroTerceto();
+    }
+
+    public void actualizarTerceto(Integer numeroTerceto, CampoTerceto campo, String valor)
+    {
+        action_obj.intCodeManager.actualizarTerceto(numeroTerceto, campo, valor);
+    }
+
+    public Integer topePilaPunteros()
+    {
+        return action_obj.intCodeManager.topePilaPunteros();
+    }
+
+    public void apilarCondSufIf(Integer numIf, Integer puntero)
+    {
+        action_obj.intCodeManager.apilarCondSufIf(numIf, puntero);
+    }
+
+    public Integer desapilarCondSufIf(Integer numIf)
+    {
+        return action_obj.intCodeManager.desapilarCondSufIf(numIf);
+    }
+
+    public Boolean hayCondicionesSuficientesIf(Integer numIf)
+    {
+        return action_obj.intCodeManager.hayCondicionesSuficientesIf(numIf);
+    }
+
+    public void apilarCondSufWhile(Integer numWhile, Integer puntero)
+    {
+        action_obj.intCodeManager.apilarCondSufWhile(numWhile, puntero);
+    }
+
+    public Integer desapilarCondSufWhile(Integer numWhile)
+    {
+        return action_obj.intCodeManager.desapilarCondSufWhile(numWhile);
+    }
+
+    public Boolean hayCondicionesSuficientesWhile(Integer numWhile)
+    {
+        return action_obj.intCodeManager.hayCondicionesSuficientesWhile(numWhile);
+    }
+
+    public String getComparadorInverso(String comparador)
+    {
+        return action_obj.intCodeManager.getComparadorInverso(comparador);
+    }
+
+    public void apilarExpresionContarPrimos(Integer puntero)
+    {
+        action_obj.intCodeManager.apilarExpresionContarPrimos(puntero);
+    }
+
+    public Integer desapilarExpresionContarPrimos()
+    {
+        return action_obj.intCodeManager.desapilarExpresionContarPrimos();
+    }
+
+    public Boolean esOperacionEntreConstantes(String puntero1, String puntero2)
+    {
+        return action_obj.intCodeManager.esOperacionEntreConstantes(puntero1, puntero2);
+    }
+
+    public void eliminarTerceto(Integer numeroTerceto)
+    {
+        action_obj.intCodeManager.eliminarTerceto(numeroTerceto);
+    }
+
+    public Integer getCte(Integer numeroTerceto)
+    {
+        return action_obj.intCodeManager.getCte(numeroTerceto);
+    }
+
+    public void apilarIf()
+    {
+        action_obj.intCodeManager.apilarIf();
+    }
+
+    public Integer getNumeroIf()
+    {
+        return action_obj.intCodeManager.getNumeroIf();
+    }
+
+    public String getStrNumeroIf()
+    {
+        return action_obj.intCodeManager.getStrNumeroIf();
+    }
+
+    public Integer desapilarIf()
+    {
+        return action_obj.intCodeManager.desapilarIf();
+    }
+
+    public void apilarWhile()
+    {
+        action_obj.intCodeManager.apilarWhile();
+    }
+
+    public Integer getNumeroWhile()
+    {
+        return action_obj.intCodeManager.getNumeroWhile();
+    }
+
+    public String getStrNumeroWhile()
+    {
+        return action_obj.intCodeManager.getStrNumeroWhile();
+    }
+
+    public Integer desapilarWhile()
+    {
+        return action_obj.intCodeManager.desapilarWhile();
+    }
+
+    public void apilarCondSuf(Integer puntero)
+    {
+        if(action_obj.blockCondition.equals("IF"))
+        {
+            Integer numeroIf = getNumeroIf();
+            apilarCondSufIf(numeroIf, puntero);
+        }
+        if(action_obj.blockCondition.equals("WHILE"))
+        {
+            Integer numeroWhile = getNumeroWhile();
+            apilarCondSufWhile(numeroWhile, puntero);
+        }
+    }
+:}
 
 // Terminals
 terminal ASSIG;
@@ -38,6 +244,7 @@ terminal CLOSE_CURLY;
 terminal OPEN_CURLY;
 terminal COR_A;
 terminal COR_C;
+terminal POINT;
 terminal IF;
 terminal ELSE;
 terminal FOR;
@@ -48,228 +255,485 @@ terminal FLOAT;
 terminal INT;
 terminal STRING;
 terminal WHILE;
-terminal NEGATIVECALC;
-terminal SUMFIRSTPRIMES;
+terminal NEGATIVE_CALC;
+terminal SUM_FIRST_PRIMES;
 
 // Non Terminals
-non terminal ss;
-non terminal declaration;
-non terminal listdec;
-non terminal sentdec;
 non terminal program;
-non terminal listid;
-non terminal iteration;
-non terminal selection;
+non terminal block;
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
+non terminal expression_list;
 non terminal term;
 non terminal factor;
-non terminal input;
-non terminal output;
+non terminal conditional;
 non terminal condition;
-non terminal comparison;
-non terminal comparator;
-non terminal function;
-non terminal listconst;
-non terminal listexpr;
+non terminal data;
+non terminal vardeclaration;
+non terminal declarationslist;
+non terminal declaration;
+non terminal varslist;
+non terminal var;
+non terminal vartype;
+non terminal if_sentence;
+non terminal negativecalc;
+non terminal sumfirstprimes;
 
-// Start Symbol Definition
-start with ss;
+start with program;
 
-// Grammar Rules
-ss
-    ::= declaration program
-        {: System.out.println("Inicio de programa principal con bloque de declaracion de variables: "); :}
-    |   declaration
-        {: System.out.println("Inicio del programa principal con declaracion y sin programa: "); :}
-    |   program
-        {: System.out.println("Inicio del programa principal sin declaracion: "); :}
-    |
-        {: System.out.println("Sin nada: "); :}
-    ;
+program ::= block
+{:
+    System.out.println("Program End");
+    setPunteroTerceto("program", getNumeroTercetoFromPuntero("block"));
+    intCodeManager.mostrarTercetos();
+:};
 
-declaration
-    ::= INIT OPEN_CURLY listdec CLOSE_CURLY
-        {: System.out.println("Declaracion de variables: "); :}
-    ;
+block ::= block sentence{: System.out.println("Block Sentence"); :};
+block ::= sentence
+{:
+    System.out.println("Block");
+    setPunteroTerceto("block", getNumeroTercetoFromPuntero("sentence"));
+:};
 
-listdec
-    ::= listdec sentdec
-        {: System.out.println("Lista de sentencia de declaracion de variables: "); :}
-    |   sentdec
+sentence ::= assignment
+{:
+    System.out.println("Sentence");
+    setPunteroTerceto("sentence", getNumeroTercetoFromPuntero("assignment"));
+:};
+assignment ::= IDENTIFIER:id ASSIG expression
+{:
+    System.out.println(id+" = Assignment");
+    String strId = id.toString();
+    symbolTableManager.checkVarIsNumeric(strId);
+    setPunteroTerceto("assignment", crearTerceto(":=", getStrNumeroTercetoFromPuntero("expression"), strId));
+:};
+assignment ::= IDENTIFIER:id ASSIG SUB INTEGER_CONSTANT:constant
+{:
+    String strConstant = constant.toString();
+    Integer integer = Integer.valueOf(strConstant);
+    integer = (-1) * integer;
+    symbolTableManager.addSymbol("_-" + strConstant, integer);
+    String strId = id.toString();
+    symbolTableManager.checkVarIsInteger(strId);
+    System.out.println(id+" = Constant assignment: " + constant);
+    Integer numTercetoConstant = crearTerceto(integer.toString());
+    setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
+:};
+assignment ::= IDENTIFIER:id ASSIG STRING_CONSTANT:constant
+{:
+    String strConstant = constant.toString();
+    symbolTableManager.addSymbol("_" + strConstant, strConstant);
+    String strId = id.toString();
+    symbolTableManager.checkVarIsString(strId);
+    System.out.println(id+" = Constant assignment: " + constant);
+    Integer numTercetoConstant = crearTerceto(strConstant);
+    setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
+:};
+assignment ::= IDENTIFIER:id ASSIG SUB FLOAT_CONSTANT:constant
+{:
+    String strConstant = constant.toString();
+    Double float_value = Double.valueOf(strConstant);
+    float_value = (-1) * float_value;
+    symbolTableManager.addSymbol("_-" + strConstant, float_value);
+    String strId = id.toString();
+    symbolTableManager.checkVarIsFloat(strId);
+    System.out.println(id+" = Float constant assignment: " + constant);
+    Integer numTercetoConstant = crearTerceto(float_value.toString());
+    setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
+:};
+assignment ::= IDENTIFIER:id ASSIG FLOAT_CONSTANT:constant
+{:
+    String strConstant = constant.toString();
+    Double float_value = Double.valueOf(strConstant);
+    symbolTableManager.addSymbol("_" + strConstant, float_value);
+    String strId = id.toString();
+    symbolTableManager.checkVarIsFloat(strId);
+    System.out.println(id+" = Float constant assignment: " + constant);
+    Integer numTercetoConstant = crearTerceto(strConstant);
+    setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
+:};
+expression_list ::= expression
+{:
+    System.out.println("expression_list = expression");
+:};
+expression_list ::= expression_list COMA expression {:
+    System.out.println("expression_list = expression_list COMA expression");
+:};
+expression ::= expression PLUS term
+{:
+    System.out.println("+");
+    if(esOperacionEntreConstantes("expression", "term")) //Constant folding
+    {
+        Integer resultado = getCte(getNumeroTercetoFromPuntero("expression")) + getCte(getNumeroTercetoFromPuntero("term"));
+        System.out.println("Resultado = " + resultado);
+        eliminarTerceto(getNumeroTercetoFromPuntero("term"));
+        eliminarTerceto(getNumeroTercetoFromPuntero("expression"));
+        symbolTableManager.addSymbol("_" + resultado.toString(), resultado);
+        setPunteroTerceto("expression", crearTerceto(resultado.toString()));
+    } else
+    {
+        setPunteroTerceto("expression",
+        crearTerceto("+", getStrNumeroTercetoFromPuntero("expression"),
+        getStrNumeroTercetoFromPuntero("term")));
+    }
+:};
+expression ::= expression SUB term
+{:
+    System.out.println("-");
+    if(esOperacionEntreConstantes("expression", "term")) //Constant folding
+    {
+        Integer resultado = getCte(getNumeroTercetoFromPuntero("expression")) - getCte(getNumeroTercetoFromPuntero("term"));
+        System.out.println("Resultado = " + resultado);
+        eliminarTerceto(getNumeroTercetoFromPuntero("term"));
+        eliminarTerceto(getNumeroTercetoFromPuntero("expression"));
+        symbolTableManager.addSymbol("_" + resultado.toString(), resultado);
+        setPunteroTerceto("expression", crearTerceto(resultado.toString()));
+    } else
+    {
+        setPunteroTerceto("expression",
+        crearTerceto("-", getStrNumeroTercetoFromPuntero("expression"),
+        getStrNumeroTercetoFromPuntero("term")));
+    }
+:};
+expression ::= term
+{:
+    System.out.println("Expression = Term");
+    setPunteroTerceto("expression", getNumeroTercetoFromPuntero("term"));
+:};
+
+
+
+term ::= term MULT factor
+{:
+    System.out.println("*");
+    if(esOperacionEntreConstantes("term", "factor"))
+    {
+        Integer resultado = getCte(getNumeroTercetoFromPuntero("term")) * getCte(getNumeroTercetoFromPuntero("factor"));
+        System.out.println("Resultado = " + resultado);
+        eliminarTerceto(getNumeroTercetoFromPuntero("factor"));
+        eliminarTerceto(getNumeroTercetoFromPuntero("term"));
+        symbolTableManager.addSymbol("_" + resultado.toString(), resultado);
+        setPunteroTerceto("term", crearTerceto(resultado.toString()));
+    } else
+    {
+        setPunteroTerceto("term",
+        crearTerceto("*", getStrNumeroTercetoFromPuntero("term"),
+        getStrNumeroTercetoFromPuntero("factor")));
+    }
+:};
+term ::= term DIV factor
+{:
+    System.out.println("/");
+    if(esOperacionEntreConstantes("term", "factor"))
+    {
+        Integer resultado = getCte(getNumeroTercetoFromPuntero("term")) / getCte(getNumeroTercetoFromPuntero("factor"));
+        System.out.println("Resultado " + getCte(getNumeroTercetoFromPuntero("term")) + "/" + getCte(getNumeroTercetoFromPuntero("factor")) + "= " + resultado);
+        eliminarTerceto(getNumeroTercetoFromPuntero("factor"));
+        eliminarTerceto(getNumeroTercetoFromPuntero("term"));
+        symbolTableManager.addSymbol("_" + resultado.toString(), resultado);
+        setPunteroTerceto("term", crearTerceto(resultado.toString()));
+    } else
+    {
+        setPunteroTerceto("term",
+        crearTerceto("/", getStrNumeroTercetoFromPuntero("term"),
+        getStrNumeroTercetoFromPuntero("factor")));
+    }
+:};
+term ::= factor
+{:
+    System.out.println("Term = factor");
+    setPunteroTerceto("term", getNumeroTercetoFromPuntero("factor"));
+:};
+factor ::= IDENTIFIER:id
+{:
+    System.out.println("Id: " + id);
+    String strId = id.toString();
+    symbolTableManager.checkVarExists(strId);
+    symbolTableManager.checkVarIsNumeric(strId);
+    setPunteroTerceto("factor", crearTerceto(strId));
+:};
+factor ::= INTEGER_CONSTANT:constant
+{:
+    String strConstant = constant.toString();
+    Integer integer = Integer.valueOf(strConstant);
+    symbolTableManager.addSymbol("_" + strConstant, integer);
+    System.out.println(" integer: " + strConstant);
+    setPunteroTerceto("factor", crearTerceto(strConstant));
+:};
+factor ::= OPEN_BRACKET
+    {:
+        apilarPuntero(getNumeroTercetoFromPuntero("term"));
+        apilarPuntero(getNumeroTercetoFromPuntero("expression"));
+    :}
+    expression CLOSE_BRACKET
+    {:
+        System.out.println("Factor = (Expression)");
+        setPunteroTerceto("factor", getNumeroTercetoFromPuntero("expression"));
+        setPunteroTerceto("expression", desapilarPuntero());
+        setPunteroTerceto("term", desapilarPuntero());
+    :};
+
+sentence ::= WRITE OPEN_BRACKET data CLOSE_BRACKET {:
+    System.out.println("WRITE:");
+    setPunteroTerceto("sentence",
+    crearTerceto("WRITE", getStrNumeroTercetoFromPuntero("data")));
+:};
+
+data ::= data COMA FLOAT_CONSTANT:float_constant
+{:
+    String strConstant = float_constant.toString();
+    Double float_value = Double.valueOf(strConstant);
+    symbolTableManager.addSymbol("_" + strConstant, float_value);
+    System.out.println(" float: " + float_constant);
+    setPunteroTerceto("data", crearTerceto(strConstant));
+    System.out.println("Componente de lista: Constante entera ");
+:};
+
+data ::= INTEGER_CONSTANT:integer_constant
+{:
+    String strConstant = integer_constant.toString();
+    Integer integer = Integer.valueOf(strConstant);
+    symbolTableManager.addSymbol("_" + strConstant, integer);
+    System.out.println(" integer: " + integer_constant);
+    setPunteroTerceto("data", crearTerceto(strConstant));
+:};
+data ::= FLOAT_CONSTANT:float_constant
+{:
+    String strConstant = float_constant.toString();
+    Double float_value = Double.valueOf(strConstant);
+    symbolTableManager.addSymbol("_" + strConstant, float_value);
+    System.out.println(" float: " + float_constant);
+    setPunteroTerceto("data", crearTerceto(strConstant));
+:};
+data ::= STRING_CONSTANT:stringConstant
+{:
+    String strConstant = stringConstant.toString();
+    symbolTableManager.addSymbol("_" + strConstant, strConstant);
+    System.out.println("data as string data");
+    setPunteroTerceto("data", crearTerceto(strConstant));
+:};
+data ::= IDENTIFIER:id
+{:
+    System.out.println(" id: " + id);
+    String strId = id.toString();
+    symbolTableManager.checkVarExists(strId);
+    setPunteroTerceto("data", crearTerceto(strId));
+:};
+
+sentence ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET {:
+    String strId = id.toString();
+    symbolTableManager.checkVarExists(strId);
+    Integer numeroTercetoId = crearTerceto(strId);
+    setPunteroTerceto("sentence",
+    crearTerceto("READ", "#" + numeroTercetoId.toString()));
+    System.out.println("READ: " + id);
+:};
+
+sentence ::= vardeclaration
+{:
+    System.out.println("Sentencia de declaracion de variables");
+:};
+
+vardeclaration ::= INIT OPEN_CURLY declarationslist CLOSE_CURLY
+{:
+    System.out.println("Declaracion de variables");
+:};
+
+declarationslist ::= declarationslist declaration
+{:
+    System.out.println("Lista de declaraciones");
+:};
+
+declarationslist ::= declaration
+{:
+    System.out.println("Declaracion");
+:};
+
+declaration ::= varslist DOS_PUNTOS vartype
+{:
+    System.out.println("Declaracion");
+:};
+
+varslist ::= varslist COMA var
+{:
+    System.out.println("Lista de variables");
+:};
+
+varslist ::= var
+{:
+    System.out.println("Variable");
+:};
+
+var ::= IDENTIFIER:id
+{:
+    symbolTableManager.checkVarDuplicated(id.toString());
+    this.varsList.add(id.toString());
+    System.out.println("Variable: " + id);
+:};
+
+vartype ::= INT
+{:
+    symbolTableManager.addVars(this.varsList, DataType.CTE_INTEGER);
+    System.out.println("Entero");
+:};
+
+vartype ::= FLOAT
+{:
+    symbolTableManager.addVars(this.varsList, DataType.CTE_FLOAT);
+    System.out.println("Flotante");
+:};
+
+vartype ::= STRING
+{:
+    symbolTableManager.addVars(this.varsList, DataType.CTE_STRING);
+    System.out.println("Cadena");
+:};
+sentence ::= {:apilarIf(); blockCondition = "IF";:} if_sentence;
+
+if_sentence ::= IF conditional OPEN_CURLY block CLOSE_CURLY
+{:
+    System.out.println("if");
+    Integer numeroIf = getNumeroIf();
+    Integer numeroTercetoFinIf = crearTerceto("ET_ENDIF" + getStrNumeroIf());
+    while(hayCondicionesSuficientesIf(numeroIf))
+    {
+        actualizarTerceto(desapilarCondSufIf(numeroIf), CampoTerceto.SEGUNDO_ELEM, "#" + numeroTercetoFinIf.toString());
+    }
+    System.out.println("fin if");
+    desapilarIf();
+:};
+if_sentence ::= IF conditional OPEN_CURLY block CLOSE_CURLY ELSE
+{:
+    Integer numeroIf = getNumeroIf();
+    Integer numeroTercetoSalto = crearTerceto("BI", "_");
+    Integer numeroTercetoComienzoElse = crearTerceto("ET_BEGINELSE" + getStrNumeroIf());
+    apilarPuntero(numeroTercetoSalto);
+    while(hayCondicionesSuficientesIf(numeroIf))
+    {
+        actualizarTerceto(desapilarCondSufIf(numeroIf), CampoTerceto.SEGUNDO_ELEM, "#" + numeroTercetoComienzoElse.toString());
+    }
+:} OPEN_CURLY block CLOSE_CURLY{:
+    Integer numeroTercetoFinElse = crearTerceto("ET_ENDELSE" + getStrNumeroIf());
+    actualizarTerceto(desapilarPuntero(), CampoTerceto.SEGUNDO_ELEM, "#" + numeroTercetoFinElse.toString());
+    System.out.println("if");
+    desapilarIf();
+:};
+
+sentence ::= WHILE
+{:
+        apilarWhile();
+        apilarPuntero(crearTerceto("ET_BEGINWHILE" + getStrNumeroWhile()));
+        blockCondition = "WHILE";
+:}
+    conditional OPEN_CURLY block CLOSE_CURLY
+{:
+    Integer numeroTercetoBI = crearTerceto("BI", "#" + desapilarPuntero().toString());
+    Integer numeroTercetoSalto = crearTerceto("ET_ENDWHILE" + getStrNumeroWhile());
+    Integer numeroWhile = getNumeroWhile();
+    while(hayCondicionesSuficientesWhile(numeroWhile))
+    {
+        actualizarTerceto(desapilarCondSufWhile(numeroWhile), CampoTerceto.SEGUNDO_ELEM, "#" + numeroTercetoSalto.toString());
+    }
+    System.out.println("while");
+    desapilarWhile();
+:};
+
+conditional ::= OPEN_BRACKET condition {:setPunteroTerceto("conditional", getNumeroTercetoFromPuntero("condition"));:}
+    AND condition CLOSE_BRACKET
+    {:
+        apilarCondSuf(desapilarPuntero());
+        apilarCondSuf(desapilarPuntero());
+        System.out.println("and conditional");
+    :};
+conditional ::= OPEN_BRACKET condition {:setPunteroTerceto("conditional", getNumeroTercetoFromPuntero("condition"));:}
+    OR condition CLOSE_BRACKET
+    {:
+        Integer numeroTercetoSegundaCondicion = desapilarPuntero();
+        Integer numeroTercetoPrimeraCondicion = desapilarPuntero();
+        actualizarTerceto(numeroTercetoPrimeraCondicion, CampoTerceto.SEGUNDO_ELEM, "#" + getNumeroTercetoFromPuntero("condition"));
+        apilarCondSuf(numeroTercetoSegundaCondicion);
+        System.out.println("or conditional");
+    :};
+conditional ::= OPEN_BRACKET NOT condition CLOSE_BRACKET {:
+    apilarCondSuf(topePilaPunteros());
+    actualizarTerceto(desapilarPuntero(), CampoTerceto.PRIMER_ELEM, getComparadorInverso(desapilarComparador()));
+    System.out.println("single conditional  not");
+:};
+conditional ::= OPEN_BRACKET condition CLOSE_BRACKET {:
+    System.out.println("single conditional");
+    setPunteroTerceto("conditional", getNumeroTercetoFromPuntero("condition"));
+    apilarCondSuf(desapilarPuntero());
+:};
+
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} OP_IG factor
         {:
-            System.out.println("Sentencia unica de declaracion de variables: ");
-            //symbolList.add(currentSymbol);
-        :}
-    ;
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BNE", "_"));
+            apilarComparador("BNE");
+        :};
 
-sentdec
-    ::= listid DOS_PUNTOS INT
-        {: System.out.println("Lista de variables enteras: "); :}
-    |   listid DOS_PUNTOS FLOAT
-        {: System.out.println("Lista de variables flotantes: "); :}
-    |   listid DOS_PUNTOS STRING
-        {: System.out.println("Lista de variables strings: "); :}
-    ;
-
-listid
-    ::= listid COMA IDENTIFIER
-        {: System.out.println("Lista de IDs: "); :}
-    |   IDENTIFIER:ident
-    ;
-
-program
-    ::= sentence
-        {: System.out.println("Sentencia única en el programa: "); :}
-    |   sentence PYC
-        {: System.out.println("Sentencia con punto y coma en el programa: "); :}
-    |   program sentence
-        {: System.out.println("Programa con múltiples sentencias: "); :}
-    |   program sentence PYC
-        {: System.out.println("Programa con múltiples sentencias: "); :}
-    ;
-
-sentence
-    ::= assignment
-        {: System.out.println("Asignación encontrada"); :}
-    |   iteration
-        {: System.out.println("Iteración encontrada"); :}
-    |   selection
-        {: System.out.println("Selección encontrada"); :}
-    |   input
-        {: System.out.println("Entrada: "); :}
-    |   output
-        {: System.out.println("Salida: "); :}
-    ;
-
-// Entrada y salida
-input
-    ::= READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET
-        {: System.out.println("Sentencia de Entrada: "); :}
-    ;
-
-output
-    ::= WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET
-        {: System.out.println("Sentencia de entrada de una constante string: "); :}
-    |   WRITE OPEN_BRACKET IDENTIFIER CLOSE_BRACKET
-        {: System.out.println("Sentencia de entrada de un id: "); :}
-    ;
-
-assignment
-    ::= listid ASSIG expression
-        {: System.out.println("Lista de asignacion de variables: "); :}
-    ;
-
-selection
-    ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura if con condición: "); :}
-    |   IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY ELSE OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura if-else con condición: "); :}
-    ;
-
-iteration
-    ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura while con condición: "); :}
-    |   FOR OPEN_BRACKET assignment PYC condition PYC expression CLOSE_BRACKET OPEN_CURLY program CLOSE_CURLY
-        {: System.out.println("Estructura for con asignación: " + ", condición: " + ", y expresión: "); :}
-    ;
-
-condition
-    ::= comparison
-        {: System.out.println("Condición simple: "); :}
-    |   condition AND comparison
-        {: System.out.println("Condición compuesta con AND: " + " && "); :}
-    |   condition OR comparison
-        {: System.out.println("Condición compuesta con OR: " + " || "); :}
-    ;
-
-comparison
-    ::= expression comparator expression
-        {: System.out.println("Comparación: "); :}
-    |   NOT expression comparator expression
-        {: System.out.println("Comparación: "); :}
-    ;
-
-comparator
-    ::= OP_MAYIG
-        {: System.out.println("Comparador >= "); :}
-    |   OP_MENIG
-        {: System.out.println("Comparador <= "); :}
-    |   OP_MAY
-        {: System.out.println("Comparador > "); :}
-    |   OP_MEN
-        {: System.out.println("Comparador < "); :}
-    |   OP_IG
-        {: System.out.println("Comparador == "); :}
-    ;
-
-expression
-    ::= expression PLUS term
-        {: System.out.println("Expresión suma: "); :}
-    |   expression SUB term
-        {: System.out.println("Expresión resta: "); :}
-    |   term
-        {: System.out.println("Expresión simple: "); :}
-    |   function
-        {: System.out.println("Expresion es Funcion especial: "); :}
-    ;
-
-function
-  ::= NEGATIVECALC OPEN_BRACKET listconst CLOSE_BRACKET
-      {: System.out.println("Regla: funcion -> negativeCalculation"); :}
-  | SUMFIRSTPRIMES OPEN_BRACKET expression CLOSE_BRACKET
-      {: System.out.println("Regla: funcion -> sumFirstPrimes"); :}
-  ;
-
-listconst
-    ::= listconst COMA INTEGER_CONSTANT
-        {: System.out.println("Componente de lista: Constante entera "); :}
-    |   listconst COMA FLOAT_CONSTANT
-        {: System.out.println("Componente de lista: Constante flotante "); :}
-    |   FLOAT_CONSTANT
-        {: System.out.println("Constante entera: "); :}
-    |   INTEGER_CONSTANT
-        {: System.out.println("Constante entera: "); :}
-    ;
-
-listexpr
-    ::= listexpr COMA expression
-        {: System.out.println("Componente de lista: expresion "); :}
-    |   expression
-        {: System.out.println("Expresion: "); :}
-    ;
-
-term
-    ::= term MULT factor
-        {: System.out.println("Término multiplicación: "); :}
-    |   term DIV factor
-        {: System.out.println("Término división: " + " / "); :}
-    |   factor
-        {: System.out.println("Término simple: "); :}
-    ;
-
-factor
-    ::= IDENTIFIER:value
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} DISTINCT factor
         {:
-            System.out.println("Factor ID: ");
-            //currentSymbol = new SymbolTableStruct(null,null,null,0);
-        :}
-    |   INTEGER_CONSTANT:value
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BEQ", "_"));
+            apilarComparador("BEQ");
+        :};
+
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} OP_MAY factor
         {:
-            System.out.println("Factor constante entera: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Int",value,0));
-        :}
-    |   FLOAT_CONSTANT:value
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BLE", "_"));
+            apilarComparador("BLE");
+        :};
+
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} OP_MAYIG factor
         {:
-            System.out.println("Factor constante flotante: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"Float",value,0));
-        :}
-    |   STRING_CONSTANT:value
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BLT", "_"));
+            apilarComparador("BLT");
+        :};
+
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} OP_MEN factor
         {:
-            System.out.println("Factor constante string: ");
-            //symbolList.add(new SymbolTableStruct("_".concat(value.toString()),"String",value,value.toString().length()));
-        :}
-    |   OPEN_BRACKET expression CLOSE_BRACKET
-        {: System.out.println("Factor expresión entre paréntesis: "); :}
-    ;
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BGE", "_"));
+            apilarComparador("BGE");
+        :};
+
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} OP_MENIG factor
+        {:
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BGT", "_"));
+            apilarComparador("BGT");
+        :};
