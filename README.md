@@ -31,7 +31,7 @@ Para Linux/Mac:
 
 Para Windows:
 ```
-./mvnw.cmd clean install
+mvnw.cmd clean install
 ```
 
 El mismo generará los ejecutables y correrá los tests.
