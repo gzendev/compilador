@@ -63,7 +63,7 @@ WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 IntegerConstant = {Digit}+
 StringConstant = {DoubleQuote}({Letter}|{Digit}|{WhiteSpace}|{Arroba}|{Percent})+{DoubleQuote}
-FloatConstant = ({Digit}+{Point}{Digit}* | {Digit}*{Point}{Digit}+)
+FloatConstant = [-]?(({Digit}+{Point}{Digit}+)|({Point}{Digit}+)|({Digit}+\.))
 
 %%
 
