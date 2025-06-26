@@ -123,27 +123,21 @@ FloatConstant = [-]?(({Digit}+{Point}{Digit}+)|({Point}{Digit}+)|({Digit}+\.))
                                                       throw new InvalidIntegerException(errorMessage);
                                                   }
                                               }
-    {FloatConstant}                           {
-                                                  double floatValue = Double.parseDouble(yytext());
-                                                  //long minValue = (long) -Math.pow(2, BITS_FLOAT - 1); // Límite mínimo para flotante
-                                                  long minValue = 0;
-                                                  //long maxValue = (long) Math.pow(2, BITS_FLOAT - 1) - 1; // Límite máximo para flotante
-                                                  long maxValue = (long) Math.pow(2, BITS_FLOAT) - 1; // Límite máximo para flotante
-
-                                                  System.out.println("floatValue: " + floatValue);
-                                                  System.out.println("maxValue: " + maxValue);
-                                                  if (floatValue >= minValue && floatValue <= maxValue) {
-                                                      return symbol(ParserSym.FLOAT_CONSTANT, yytext());
-                                                  } else {
-                                                      String errorMessage;
-                                                      if (floatValue < minValue) {
-                                                          errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes.";
-                                                      } else {
-                                                          errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes.";
-                                                      }
-                                                      throw new InvalidFloatException(errorMessage);
-                                                  }
-                                              }
+{FloatConstant}                                     
+                                            {
+                                                double floatValue = Double.parseDouble(yytext());
+                                                if (floatValue >= -Double.MAX_VALUE && floatValue <= Double.MAX_VALUE) {
+                                                    return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+                                                } else {
+                                                    String errorMessage;
+                                                    if (floatValue < -Double.MAX_VALUE) { // Si es más pequeño (más negativo) que el límite
+                                                        errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes.";
+                                                    } else { // Si es más grande (más positivo) que el límite
+                                                        errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes.";
+                                                    }
+                                                    throw new InvalidFloatException(errorMessage);
+                                                }
+                                            }
 
   /* operators */
   {Plus}                                    { System.out.println("Token: " + yytext() + " | Tipo: PLUS"); return symbol(ParserSym.PLUS); }
