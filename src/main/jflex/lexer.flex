@@ -124,20 +124,20 @@ FloatConstant = [-]?(({Digit}+{Point}{Digit}+)|({Point}{Digit}+)|({Digit}+\.))
                                                   }
                                               }
 {FloatConstant}                                     
-                                            {
-                                                double floatValue = Double.parseDouble(yytext());
-                                                if (floatValue >= -Double.MAX_VALUE && floatValue <= Double.MAX_VALUE) {
-                                                    return symbol(ParserSym.FLOAT_CONSTANT, yytext());
-                                                } else {
-                                                    String errorMessage;
-                                                    if (floatValue < -Double.MAX_VALUE) { // Si es más pequeño (más negativo) que el límite
-                                                        errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes.";
-                                                    } else { // Si es más grande (más positivo) que el límite
-                                                        errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes.";
+                                                {
+                                                    double floatValue = Double.parseDouble(yytext());
+                                                    if (floatValue >= -Float.MAX_VALUE && floatValue <= Float.MAX_VALUE) {
+                                                        return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+                                                    } else {
+                                                        String errorMessage;
+                                                        if (floatValue < -Float.MAX_VALUE) {
+                                                            errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes que da la consigna (32 bits).";
+                                                        } else {
+                                                            errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes que da la consigna (32 bits).";
+                                                        }
+                                                        throw new InvalidFloatException(errorMessage);
                                                     }
-                                                    throw new InvalidFloatException(errorMessage);
                                                 }
-                                            }
 
   /* operators */
   {Plus}                                    { System.out.println("Token: " + yytext() + " | Tipo: PLUS"); return symbol(ParserSym.PLUS); }

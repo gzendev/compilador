@@ -924,24 +924,27 @@ public class Lexer implements java_cup.runtime.Scanner {
           case 58: break;
           case 21:
             { double floatValue = Double.parseDouble(yytext());
-                                                  //long minValue = (long) -Math.pow(2, BITS_FLOAT - 1); // Límite mínimo para flotante
-                                                  long minValue = 0;
-                                                  //long maxValue = (long) Math.pow(2, BITS_FLOAT - 1) - 1; // Límite máximo para flotante
-                                                  long maxValue = (long) Math.pow(2, BITS_FLOAT) - 1; // Límite máximo para flotante
 
-                                                  System.out.println("floatValue: " + floatValue);
-                                                  System.out.println("maxValue: " + maxValue);
-                                                  if (floatValue >= minValue && floatValue <= maxValue) {
-                                                      return symbol(ParserSym.FLOAT_CONSTANT, yytext());
-                                                  } else {
-                                                      String errorMessage;
-                                                      if (floatValue < minValue) {
-                                                          errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes.";
-                                                      } else {
-                                                          errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes.";
-                                                      }
-                                                      throw new InvalidFloatException(errorMessage);
-                                                  }
+                                                // Elimina las líneas de cálculo de minValue y maxValue
+                                                // long minValue = 0;
+                                                // long maxValue = (long) Math.pow(2, BITS_FLOAT) - 1;
+
+                                                // System.out.println("floatValue: " + floatValue); // Puedes quitar estas líneas de depuración si quieres
+                                                // System.out.println("maxValue: " + maxValue); // Puedes quitar estas líneas de depuración si quieres
+
+                                                // **ESTA ES LA CORRECCIÓN CLAVE**
+                                                // Usa los límites estándar de Java para double
+                                                if (floatValue >= -Double.MAX_VALUE && floatValue <= Double.MAX_VALUE) {
+                                                    return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+                                                } else {
+                                                    String errorMessage;
+                                                    if (floatValue < -Double.MAX_VALUE) { // Si es más pequeño (más negativo) que el límite
+                                                        errorMessage = "La constante [" + yytext() + "] está por debajo del límite de los números flotantes.";
+                                                    } else { // Si es más grande (más positivo) que el límite
+                                                        errorMessage = "La constante [" + yytext() + "] está por encima del límite de los números flotantes.";
+                                                    }
+                                                    throw new InvalidFloatException(errorMessage);
+                                                }
             }
             // fall through
           case 59: break;
