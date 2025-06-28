@@ -402,7 +402,12 @@ expression ::= term
     setPunteroTerceto("expression", getNumeroTercetoFromPuntero("term"));
 :};
 
+expression ::= negativecalc;
 
+negativecalc ::= NEGATIVE_CALC OPEN_BRACKET data CLOSE_BRACKET
+{:
+    System.out.println("Expression = Term");
+:};
 
 term ::= term MULT factor
 {:
@@ -461,6 +466,7 @@ factor ::= INTEGER_CONSTANT:constant
     System.out.println(" integer: " + strConstant);
     setPunteroTerceto("factor", crearTerceto(strConstant));
 :};
+
 factor ::= OPEN_BRACKET
     {:
         apilarPuntero(getNumeroTercetoFromPuntero("term"));
