@@ -402,11 +402,19 @@ expression ::= term
     setPunteroTerceto("expression", getNumeroTercetoFromPuntero("term"));
 :};
 
-expression ::= negativecalc;
-
+expression ::= negativecalc
+{:
+:};
 negativecalc ::= NEGATIVE_CALC OPEN_BRACKET data CLOSE_BRACKET
 {:
-    System.out.println("Expression = Term");
+    System.out.println("Expression = negativecalc");
+:};
+expression ::= sumfirstprimes
+{:
+:};
+sumfirstprimes ::= SUM_FIRST_PRIMES OPEN_BRACKET INTEGER_CONSTANT:constant CLOSE_BRACKET
+{:
+    System.out.println("Expression = sumfirstprimes");
 :};
 
 term ::= term MULT factor
