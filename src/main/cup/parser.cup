@@ -11,10 +11,10 @@ class Parser;
 
 action code
 {:
-    public SymbolTableManager symbolTableManager = new SymbolTableManager();
-    public ArrayList<String> varsList = new ArrayList();
-    public IntermediateCodeManager intCodeManager = new IntermediateCodeManager(symbolTableManager);
-    public String blockCondition = "IF";
+     public SymbolTableManager symbolTableManager = new SymbolTableManager();
+     public ArrayList<String> varsList = new ArrayList();
+     public IntermediateCodeManager intCodeManager = new IntermediateCodeManager();
+     public String blockCondition = "IF";
 :}
 parser code
 {:
@@ -264,7 +264,7 @@ non terminal block;
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
-non terminal java.util.List<String> expression_list; 
+non terminal expression_list;
 non terminal term;
 non terminal factor;
 non terminal conditional;
@@ -278,9 +278,7 @@ non terminal var;
 non terminal vartype;
 non terminal if_sentence;
 non terminal negativecalc;
-non terminal function_call_negative_calc;
 non terminal sumfirstprimes;
-non terminal function_call_sum_primes;
 
 start with program;
 
@@ -355,18 +353,12 @@ assignment ::= IDENTIFIER:id ASSIG FLOAT_CONSTANT:constant
     Integer numTercetoConstant = crearTerceto(strConstant);
     setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
 :};
-expression_list ::= expression:e
+expression_list ::= expression
 {:
     System.out.println("expression_list = expression");
-    java.util.List<String> pointers = new java.util.ArrayList<>();
-    pointers.add(getStrNumeroTercetoFromPuntero("e"));
-    RESULT = pointers;
 :};
-expression_list ::= expression_list:list COMA expression:e
-{:
+expression_list ::= expression_list COMA expression {:
     System.out.println("expression_list = expression_list COMA expression");
-    list.add(getStrNumeroTercetoFromPuntero("e"));
-    RESULT = list;
 :};
 expression ::= expression PLUS term
 {:
@@ -480,67 +472,8 @@ factor ::= OPEN_BRACKET
         setPunteroTerceto("factor", getNumeroTercetoFromPuntero("expression"));
         setPunteroTerceto("expression", desapilarPuntero());
         setPunteroTerceto("term", desapilarPuntero());
-    :};  
-function_call_negative_calc ::= NEGATIVE_CALC OPEN_BRACKET expression_list:args CLOSE_BRACKET
-{:
-    int negativeCount = 0;              //inicializo
-    double sumOfNegatives = 0.0;        // neutro de la suma
-    double productOfNegatives = 1.0;    // neutro de la mult
+    :};
 
-    for (String ptr : args) {
-        Double value = action_obj.intCodeManager.getNumericValueFromPointer(ptr); // Usa el auxiliar
-        if (value != null && value < 0) {
-            negativeCount++;
-            sumOfNegatives += value;
-            productOfNegatives *= value;
-        }
-    }
-
-    double finalResult = 0.0;
-    if (negativeCount % 2 == 0 && negativeCount > 0) {
-        finalResult = sumOfNegatives;
-    } else if (negativeCount % 2 != 0) {
-        finalResult = productOfNegatives;
-    }
-
-    String tempResultName = action_obj.symbolTableManager.addTemporal(finalResult); // Usa el auxiliar
-    setPunteroTerceto("function_call_negative_calc", crearTerceto(tempResultName));
-:};
-function_call_sum_primes ::= SUM_FIRST_PRIMES OPEN_BRACKET expression:e CLOSE_BRACKET
-{:
-    double finalResult;
-    String argPointer = getStrNumeroTercetoFromPuntero("e");
-
-    if (action_obj.intCodeManager.isPointerConstant(argPointer)) { // Usa el auxiliar
-        Double limitDouble = action_obj.intCodeManager.getNumericValueFromPointer(argPointer); // Usa el auxiliar
-        int limit = limitDouble != null ? limitDouble.intValue() : 0;
-        if (limit < 0) 
-            limit = 0;
-
-        int sum = 0;
-        if (limit > 0) {
-            int count = 0;
-            int num = 2;
-            while (count < limit) {
-                boolean isPrime = true;
-                for (int i = 2; i * i <= num; i++) {
-                    if (num % i == 0) { isPrime = false; break; }
-                }
-                if (isPrime) { 
-                    sum += num; count++; 
-                }
-                num++;
-            }
-        }
-        finalResult = (double)sum;
-        String tempResultName = action_obj.symbolTableManager.addTemporal(finalResult); // Usa el auxiliar
-        setPunteroTerceto("function_call_sum_primes", crearTerceto(tempResultName));
-    } else {
-        // Si el argumento no es constante, genera un terceto de llamada a función en tiempo de ejecución.
-        // Asume que "CALL_SUM_PRIMES" es el operador para tu terceto.
-        setPunteroTerceto("function_call_sum_primes", crearTerceto("CALL_SUM_PRIMES", argPointer));
-    }
-:};
 sentence ::= WRITE OPEN_BRACKET data CLOSE_BRACKET {:
     System.out.println("WRITE:");
     setPunteroTerceto("sentence",

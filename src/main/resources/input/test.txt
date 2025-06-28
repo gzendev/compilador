@@ -37,3 +37,10 @@ while (valor1 > valor2) {
 }
 
 #+ FUNCIONES ESPECIALES VALIDAS +#
+
+x := negativeCalculation(-2.0, -3.0, -1.0)         #+ 3 negativos -> multiplicar: -2*-3*-1 = -6.0 +#
+x := negativeCalculation(-5.5, -1.5)               #+ 2 negativos -> sumar: -7.0 +#
+x := negativeCalculation(4.0, -2.0, -1.0)          #+ 2 negativos -> sumar: -3.0 +#
+x := negativeCalculation(3.0, 4.0)                 #+ sin negativos -> resultado = 0 o neutro, según implementación +#
+x := sumFirstPrimes(5)                             #+ 2+3+5+7+11 = 28 +#
+x := sumFirstPrimes(0)                             #+ suma de cero primos = 0 +#
