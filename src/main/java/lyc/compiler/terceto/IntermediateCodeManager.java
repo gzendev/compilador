@@ -1,6 +1,8 @@
 package lyc.compiler.terceto;
 
+import lyc.compiler.model.UnknownVariableException;
 import lyc.compiler.symboltable.DataType;
+import lyc.compiler.symboltable.SymbolTableManager;
 
 import java.util.*;
 
@@ -17,6 +19,7 @@ public class IntermediateCodeManager {
     private Queue<String> resultsStringAux = new LinkedList<String>();
     private Stack<Integer> pilaIfs = new Stack<Integer>();
     private Stack<Integer> pilaWhiles = new Stack<Integer>();
+    private SymbolTableManager symbolTableManager;
     private Integer contIfs = 0;
     private Integer contWhiles = 0;
     private static final HashMap<String, String> comparadorInverso;
@@ -31,7 +34,10 @@ public class IntermediateCodeManager {
         comparadorInverso.put("BGE", "BLT");
     }
 
-    ;
+    // Constructor para inicializar SymbolTableManager si es necesario
+    public IntermediateCodeManager(SymbolTableManager symbolTableManager) {
+        this.symbolTableManager = symbolTableManager;
+    }
 
     public Integer crearTerceto(String operador, String operando1, String operando2) {
         Integer numTerceto = tercetos.size();
@@ -244,5 +250,61 @@ public class IntermediateCodeManager {
 
     public List<Terceto> getTercetosList() {
         return this.tercetos;
+    }
+
+
+    // ***** ESTOS MÉTODOS DEBEN IR DENTRO DE LA CLASE IntermediateCodeManager *****
+    public Double getNumericValueFromPointer(String pointer) {
+        try {
+            if (pointer.startsWith("#")) { // Es un puntero a un terceto (ej: #15)
+                Integer tercetoNum = Integer.parseInt(pointer.substring(1));
+                Terceto t = getTerceto(tercetoNum);
+                if (t == null) return null;
+
+                // 1. Si el terceto es una constante literal directamente
+                if (t.esCte()) {
+                    try {
+                        return Double.valueOf(t.getOperando1());
+                    } catch (NumberFormatException ignored) {
+                        // Si es 'esCte' pero no es un número parseable (ej. "ET_X"), ignoramos.
+                    }
+                }
+
+                // 2. Si el resultado del terceto se guarda en una variable auxiliar (temporal)
+                String resultAuxName = t.getResultAux();
+                if (resultAuxName != null && symbolTableManager.isSymbolInTable(resultAuxName)) {
+                    Object val = symbolTableManager.getValue(resultAuxName);
+                    if (val instanceof Double) return (Double) val;
+                    if (val instanceof Integer) return ((Integer) val).doubleValue();
+                }
+
+                return null; // No se pudo resolver un valor numérico desde este terceto
+            } else { // Es un lexema directo (nombre de variable o constante literal)
+                // Primero, intentar obtener el valor de la tabla de símbolos
+                try {
+                    Object val = symbolTableManager.getValue(pointer);
+                    if (val instanceof Double) return (Double) val;
+                    if (val instanceof Integer) return ((Integer) val).doubleValue();
+                } catch (UnknownVariableException ignored) {
+                    // Si no se encontró en la tabla de símbolos, intentar parsear como literal directo.
+                }
+
+                // Si no está en la tabla de símbolos o no es una variable, intentar parsear directamente como un número
+                try {
+                    return Double.valueOf(pointer);
+                } catch (NumberFormatException ignored) {
+                    // No es un literal numérico directo
+                }
+                return null; // No es un valor numérico o no se pudo resolver
+            }
+        } catch (NumberFormatException | UnknownVariableException e) {
+            System.err.println("Error al resolver el valor numérico para '" + pointer + "': " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean isPointerConstant(String pointer) {
+        // Si podemos obtener un valor numérico, lo consideramos constante para esta lógica
+        return getNumericValueFromPointer(pointer) != null;
     }
 }

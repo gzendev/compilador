@@ -46,7 +46,7 @@ public class Symbol {
         this.type = DataType.CTE_INTEGER;
         this.name = name;
         this.intValue = value;
-        this.floatValue = Double.valueOf(value);
+        this.floatValue = Double.valueOf(value); 
         this.isCte = true;
 
         this.length = null;
@@ -62,6 +62,17 @@ public class Symbol {
         this.length = null;
         this.stringValue = null;
         this.intValue = null;
+    }
+
+    public Object getValue() {
+        if (this.type == DataType.CTE_INTEGER) {
+            return this.intValue;
+        } else if (this.type == DataType.CTE_FLOAT) {
+            return this.floatValue;
+        } else if (this.type == DataType.CTE_STRING) {
+            return this.stringValue;
+        }
+        return null; 
     }
 
     private String getValueAsString() {
@@ -107,15 +118,25 @@ public class Symbol {
     public void setValue(String value) {
         this.stringValue = value;
         this.length = value.length();
+        this.intValue = null;
+        this.floatValue = null;
+        this.type = DataType.CTE_STRING; 
     }
 
     public void setValue(Integer value) {
         this.intValue = value;
         this.floatValue = Double.valueOf(value);
+        this.stringValue = null;
+        this.length = null;
+        this.type = DataType.CTE_INTEGER; 
     }
 
     public void setValue(Double value) {
         this.floatValue = value;
+        this.intValue = null;
+        this.stringValue = null;
+        this.length = null;
+        this.type = DataType.CTE_FLOAT; 
     }
 
     public Boolean isCte() {

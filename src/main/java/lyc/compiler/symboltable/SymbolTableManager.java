@@ -13,7 +13,7 @@ public class SymbolTableManager {
         return symbolsPosMap.get(name);
     }
 
-    private Boolean isSymbolInTable(String name) {
+    public Boolean isSymbolInTable(String name) {
         return !(getSymbolPos(name) == null);
     }
 
@@ -85,6 +85,26 @@ public class SymbolTableManager {
     public void setVarValue(String name, Double value) throws UnknownVariableException {
         if (isSymbolInTable(name)) {
             symbolsList.get(getSymbolPos(name)).setValue(value);
+        } else {
+            throw new UnknownVariableException(name);
+        }
+    }
+
+    public Object getValue(String name) throws UnknownVariableException {
+        // CORREGIDO: Cambiado 'contains(name)' por 'isSymbolInTable(name)'
+        if (isSymbolInTable(name)) {
+            Symbol symbol = symbolsList.get(getSymbolPos(name));
+
+            if (symbol.getType() == DataType.CTE_INTEGER) {
+                // CORREGIDO: Usar getValue() y castear a Integer
+                return (Integer) symbol.getValue();
+            } else if (symbol.getType() == DataType.CTE_FLOAT) {
+                // CORREGIDO: Usar getValue() y castear a Double
+                return (Double) symbol.getValue();
+            } else if (symbol.getType() == DataType.CTE_STRING) {
+                return symbol.getStringValue();
+            }
+            return null;
         } else {
             throw new UnknownVariableException(name);
         }
@@ -182,5 +202,26 @@ public class SymbolTableManager {
 
     public List<Symbol> getSymbolsList() {
         return symbolsList;
+    }
+
+    public String addTemporal(Object value) {
+        String tempName = "@TEMP_" + (symbolsList.size());
+
+        if (value instanceof Integer) {
+            addSymbol(tempName, (Integer) value);
+        }
+        else
+            if (value instanceof Double) {
+                addSymbol(tempName, (Double) value);
+            }
+            else
+                if (value instanceof String) {
+                    addSymbol(tempName, (String) value);
+                }
+                else
+                {
+                    throw new IllegalArgumentException("Tipo de dato no soportado para variable temporal: " + value.getClass().getName());
+                }
+        return tempName;
     }
 }
