@@ -245,4 +245,22 @@ public class IntermediateCodeManager {
     public List<Terceto> getTercetosList() {
         return this.tercetos;
     }
+
+    public Integer calcularNegative() {
+        return this.calcularNegative();
+    }
+
+    public Integer calcularPrimos(Integer candidato) {
+        return this.calcularPrimos(candidato);
+    }
+
+    public int getPilaExpresionesContarPrimosSize() {
+        return this.pilaExpresionesContarPrimos.size();
+    }
+
+    public boolean isPilaExpresionesContarPrimosEmpty() {
+        return this.pilaExpresionesContarPrimos.isEmpty();
+    }
 }
+
+
