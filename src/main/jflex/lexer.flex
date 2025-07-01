@@ -50,6 +50,7 @@ Semicolon = ";"
 Op_men = "<"
 Op_may = ">"
 Distinct  = "!="
+Igual = "=="
 Coma = ","
 DosPuntos = ":"
 Point = "."
@@ -62,7 +63,7 @@ Percent = "%"
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 IntegerConstant = {Digit}+
-StringConstant = {DoubleQuote}({Letter}|{Digit}|{WhiteSpace}|{Arroba}|{Percent})+{DoubleQuote}
+StringConstant = {DoubleQuote}({Letter}|{Digit}|{WhiteSpace}|{Arroba}|{Percent}|{DosPuntos}|[ ])+{DoubleQuote}
 FloatConstant = [-]?(({Digit}+{Point}{Digit}+)|({Point}{Digit}+)|({Digit}+\.))
 
 %%
@@ -153,6 +154,8 @@ FloatConstant = [-]?(({Digit}+{Point}{Digit}+)|({Point}{Digit}+)|({Digit}+\.))
   {CorcheteCierra}                          { System.out.println("Token: " + yytext() + " | Tipo: COR_C"); return symbol(ParserSym.COR_C); }
   {Op_men}                                  { System.out.println("Token: " + yytext() + " | Tipo: OP_MEN"); return symbol(ParserSym.OP_MEN); }
   {Op_may}                                  { System.out.println("Token: " + yytext() + " | Tipo: OP_MAY"); return symbol(ParserSym.OP_MAY); }
+  {Igual}                                   { System.out.println("Token: " + yytext() + " | Tipo: IGUAL"); return symbol(ParserSym.IGUAL); }
+  {Distinct}                                { System.out.println("Token: " + yytext() + " | Tipo: DISTINCT"); return symbol(ParserSym.DISTINCT); }
   {Semicolon}                               { System.out.println("Token: " + yytext() + " | Tipo: PYC"); return symbol(ParserSym.PYC); }
   {Coma}                                    { System.out.println("Token: " + yytext() + " | Tipo: COMA"); return symbol(ParserSym.COMA); }
   {Point}                                   { return symbol(ParserSym.POINT); }

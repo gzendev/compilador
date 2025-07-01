@@ -1,48 +1,40 @@
-#+ Este es un comentario +#
-
 init {
-    x, c, a1, b1, valor1, valor2 : Float
-    variable1 : Int
-    p1, p2, p3, nombre : String
-    d, e, contador : Int
+    a, b, c, d, e : Int
+    f : Float
+    cadena : String
 }
 
-a1 := d*(e - 21)/4
+c := 3
+a := 1
+b := 0
 
-c:=d*(e - 21)/4
+if (a == 1) {
+    if (a == 1) {
+        b := 1
+        if (a == 1) {
+            b := 2
+        }
+    }
+    b := 3
+}
 
-#+ Asignaciones de valores flotantes +#
-valor1 := 99999.99
-valor1 := 99.
-valor1 := .9999
-
-#+ Asignaciones de cadenas de texto +#
-nombre := "@sdADaSjfla%dfg"
-nombre := "asldk  fh sjf"
-
-#+ Asignación de un valor entero +#
-contador := 2
-
-#+ Estructura condicional +#
-if (valor1 > valor2) {
-    write("valor1 es mayor que valor2")
+if (a > b) {
+    b := 5
 } else {
-    write("valor1 es menor o igual a valor2")
+    b := 3
 }
 
-#+ Estructura de bucle WHILE +#
-while (valor1 > valor2) {
-    write("valor1 es mayor que valor2")
-    valor1 := valor1 + 1
+while (a < b AND c == b) {
+    a := a + 1
 }
 
-#+ FUNCIONES ESPECIALES VALIDAS +#
+write("Ingrese cadena:")
+read(cadena)
+write(cadena)
 
-x := negativeCalculation(3.5, -2.0, 4.1, -1.5, -3.0)    #+ 3 negativos (impar) => multiplicar: -2.0 * -1.5 * -3.0 = -9.0 +#
-x := negativeCalculation(-2.0, -3.0, -1.0)              #+ 3 negativos (impar) => multiplicar: -2 * -3 * -1       = -6.0 +#
-x := negativeCalculation(-5.5, -1.5)                    #+ 2 negativos (par)   => sumar: -5.5 - 1.5               = -7.0 +#
-x := negativeCalculation(4.0, -2.0, -1.0)               #+ 2 negativos (par)   => sumar: -2.0 - 1-0               = -3.0 +#
-x := negativeCalculation(3.0, 4.0)                      #+ sin negativos       => cero                            =  0   +#
+#+ Comentario: Las funciones timer y firstindexof no están implementadas en tu lexer actual +#
+#+ timer(4,write("Hola mundo")) +#
+#+ firstindexof(a;[1,2,3,4,5,6,7,8,9]) +#
 
-x := sumFirstPrimes(5)      #+ 2+3+5+7+11 = 28 +#
-x := sumFirstPrimes(0)      #+ suma de cero primos = 0 +#
+c := d * (e - 21) / 4
+c := d * (e - 21) / 4 

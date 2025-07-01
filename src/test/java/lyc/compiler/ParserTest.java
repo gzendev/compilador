@@ -93,15 +93,30 @@ public class ParserTest {
     }
 
     private void compilationSuccessful(String input) throws Exception {
-        assertThat(scan(input).sym).isEqualTo(ParserSym.EOF);
+        int eofSym = getParserSymValue("EOF");
+        assertThat(scan(input).sym).isEqualTo(eofSym);
     }
 
     private void compilationError(String input){
-        assertThrows(Exception.class, () -> scan(input));
+        assertThrows(Exception.class, () -> {
+            try {
+                scan(input);
+            } catch (Exception e) {
+                Throwable cause = e.getCause();
+                if (cause != null) throw (Exception) cause;
+                throw e;
+            }
+        });
     }
 
     private Symbol scan(String input) throws Exception {
-        return ParserFactory.create(input).parse();
+        Object parser = ParserFactory.create(input);
+        return (Symbol) parser.getClass().getMethod("parse").invoke(parser);
+    }
+
+    private int getParserSymValue(String name) throws Exception {
+        Class<?> parserSymClass = Class.forName("lyc.compiler.ParserSym");
+        return parserSymClass.getField(name).getInt(null);
     }
 
     private String readFromFile(String fileName) throws IOException {

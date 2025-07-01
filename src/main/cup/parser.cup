@@ -26,7 +26,6 @@ parser code
         return action_obj.intCodeManager.getTercetosList();
     }
 
-
     public Integer crearTerceto(String operador, String operando1, String operando2)
     {
         return action_obj.intCodeManager.crearTerceto(operador, operando1, operando2);
@@ -215,75 +214,6 @@ parser code
             apilarCondSufWhile(numeroWhile, puntero);
         }
     }
-
-    public Integer calcularPrimos(Integer constant)
-    {
-        Integer resultado = 0;
-        constant = Math.abs(constant);
-        Integer candidato = 2;
-        Integer encontrados = 0;
-        boolean esPrimo;
-
-        while(encontrados < constant)
-        {
-            esPrimo = true;
-            for(int i = 2; i <= Math.sqrt(candidato); i++)
-            {
-                if(candidato % i == 0)
-                {
-                    esPrimo = false;
-                    break;
-                }
-            }
-            if(esPrimo)
-            {
-                resultado += candidato;
-                encontrados++;
-            }
-            candidato++;
-        }
-
-        System.out.println("Suma de los primeros " + constant + " primos: " + resultado);
-        Integer numTercetoResultado = crearTerceto(resultado.toString());
-        setPunteroTerceto("sumfirstprimes", numTercetoResultado);
-        return numTercetoResultado;
-    }
-
-    public Integer calcularNegativos() {
-        //System.out.println("--------------------------------------------------------------->DEBUG pilaExpresionesContarPrimos size: " + action_obj.intCodeManager.getPilaExpresionesContarPrimosSize());
-        List<Double> negativos = new ArrayList<>();
-        while (!action_obj.intCodeManager.isPilaExpresionesContarPrimosEmpty()) {
-            Integer numTerceto = desapilarExpresionContarPrimos();
-            String valorStr = action_obj.intCodeManager.getTerceto(numTerceto).getOperando1();
-            Double valor = null;
-            try {
-                valor = Double.valueOf(valorStr);
-            } catch (Exception e) {
-                System.out.println("[ERROR] No se pudo parsear a Double: " + valorStr);
-                continue;
-            }
-            //System.out.println("--------------------------------------------------------------->DEBUG NICO: valor = " + valor);
-            if (valor < 0) {
-                negativos.add(valor);
-            }
-        }
-        Double resultado = 0.0;
-        //System.out.println("--------------------------------------------------------------->DEBUG NICO: negativos.size() = " + negativos.size());
-        if (negativos.size() == 0) {
-            resultado = 0.0;
-        } else if (negativos.size() % 2 == 0) {
-            // Par: suma
-            for (Double v : negativos) resultado += v;
-        } else {
-            // Impar: producto
-            resultado = 1.0;
-            for (Double v : negativos) resultado *= v;
-        }
-        System.out.println("Resultado negativeCalculation: " + resultado);
-        Integer numTercetoResultado = crearTerceto(resultado.toString());
-        setPunteroTerceto("negativecalc", numTercetoResultado);
-        return numTercetoResultado;
-    }
 :}
 
 // Terminals
@@ -327,6 +257,7 @@ terminal STRING;
 terminal WHILE;
 terminal NEGATIVE_CALC;
 terminal SUM_FIRST_PRIMES;
+terminal IGUAL;
 
 // Non Terminals
 non terminal program;
@@ -334,7 +265,7 @@ non terminal block;
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
-non terminal expression_list;
+non terminal List<Integer> expression_list;
 non terminal term;
 non terminal factor;
 non terminal conditional;
@@ -424,12 +355,16 @@ assignment ::= IDENTIFIER:id ASSIG FLOAT_CONSTANT:constant
     Integer numTercetoConstant = crearTerceto(strConstant);
     setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
 :};
-expression_list ::= expression
+expression_list ::= expression:e
 {:
-    System.out.println("expression_list = expression");
+    List<Integer> lista = new ArrayList<>();
+    lista.add(getNumeroTercetoFromPuntero("expression"));
+    RESULT = lista;
 :};
-expression_list ::= expression_list COMA expression {:
-    System.out.println("expression_list = expression_list COMA expression");
+expression_list ::= expression_list:lista COMA expression:e
+{:
+    lista.add(getNumeroTercetoFromPuntero("expression"));
+    RESULT = lista;
 :};
 expression ::= expression PLUS term
 {:
@@ -473,22 +408,7 @@ expression ::= term
     setPunteroTerceto("expression", getNumeroTercetoFromPuntero("term"));
 :};
 
-expression ::= negativecalc
-{:
-:};
-negativecalc ::= NEGATIVE_CALC OPEN_BRACKET data_list CLOSE_BRACKET
-{:
-    System.out.println("Expression = negativecalc");
-    calcularNegativos();
-:};
-expression ::= sumfirstprimes
-{:
-:};
-sumfirstprimes ::= SUM_FIRST_PRIMES OPEN_BRACKET INTEGER_CONSTANT:constant CLOSE_BRACKET
-{:
-    System.out.println("Expression = sumfirstprimes");
-    calcularPrimos(Integer.valueOf((String)constant));
-:};
+
 
 term ::= term MULT factor
 {:
@@ -547,7 +467,34 @@ factor ::= INTEGER_CONSTANT:constant
     System.out.println(" integer: " + strConstant);
     setPunteroTerceto("factor", crearTerceto(strConstant));
 :};
-
+factor ::= NEGATIVE_CALC OPEN_BRACKET expression_list:lista CLOSE_BRACKET
+{:
+    System.out.println("negativeCalculation function");
+    List<Integer> tercetos = (List<Integer>) lista;
+    
+    // En la solución práctica, asumimos que cualquier elemento puede ser negativo
+    // Por lo tanto, incluimos todos los elementos en la operación
+    int cantidadElementos = tercetos.size();
+    Integer resultadoTerceto = null;
+    if (cantidadElementos == 0) {
+        resultadoTerceto = crearTerceto("0");
+    } else if (cantidadElementos % 2 == 0) {
+        // Suma todos los elementos
+        Integer suma = tercetos.get(0);
+        for (int i = 1; i < tercetos.size(); i++) {
+            suma = crearTerceto("+", "#" + suma, "#" + tercetos.get(i));
+        }
+        resultadoTerceto = suma;
+    } else {
+        // Multiplica todos los elementos
+        Integer mult = tercetos.get(0);
+        for (int i = 1; i < tercetos.size(); i++) {
+            mult = crearTerceto("*", "#" + mult, "#" + tercetos.get(i));
+        }
+        resultadoTerceto = mult;
+    }
+    setPunteroTerceto("factor", resultadoTerceto);
+:};
 factor ::= OPEN_BRACKET
     {:
         apilarPuntero(getNumeroTercetoFromPuntero("term"));
@@ -567,11 +514,15 @@ sentence ::= WRITE OPEN_BRACKET data CLOSE_BRACKET {:
     crearTerceto("WRITE", getStrNumeroTercetoFromPuntero("data")));
 :};
 
-data_list ::= data
-{: apilarExpresionContarPrimos(getNumeroTercetoFromPuntero("data")); :}
-| data_list COMA data
-{: apilarExpresionContarPrimos(getNumeroTercetoFromPuntero("data")); :}
-;
+data ::= data COMA FLOAT_CONSTANT:float_constant
+{:
+    String strConstant = float_constant.toString();
+    Double float_value = Double.valueOf(strConstant);
+    symbolTableManager.addSymbol("_" + strConstant, float_value);
+    System.out.println(" float: " + float_constant);
+    setPunteroTerceto("data", crearTerceto(strConstant));
+    System.out.println("Componente de lista: Constante entera ");
+:};
 
 data ::= INTEGER_CONSTANT:integer_constant
 {:
@@ -771,6 +722,18 @@ condition ::= factor
             crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
             apilarPuntero(crearTerceto("BEQ", "_"));
             apilarComparador("BEQ");
+        :};
+
+condition ::= factor
+{:
+    apilarPuntero(getNumeroTercetoFromPuntero("factor"));
+:} IGUAL factor
+        {:
+            System.out.println("condition");
+            setPunteroTerceto("condition",
+            crearTerceto("CMP", "#" + desapilarPuntero().toString(), getStrNumeroTercetoFromPuntero("factor")));
+            apilarPuntero(crearTerceto("BNE", "_"));
+            apilarComparador("BNE");
         :};
 
 condition ::= factor

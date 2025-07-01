@@ -1,22 +1,28 @@
 package lyc.compiler.factories;
 
-import lyc.compiler.Lexer;
-import lyc.compiler.Parser;
 import java.io.Reader;
 public final class ParserFactory {
 
     private ParserFactory(){}
 
-    public static Parser create(Lexer lexer) {
-        return new Parser(lexer);
+    public static Object create(Object lexer) {
+        try {
+            Class<?> parserClass = Class.forName("lyc.compiler.Parser");
+            Class<?> scannerInterface = Class.forName("java_cup.runtime.Scanner");
+            return parserClass.getConstructor(scannerInterface).newInstance(lexer);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static Parser create(String input) {
-        return new Parser(LexerFactory.create(input));
+    public static Object create(String input) {
+        Object lexer = LexerFactory.create(input);
+        return create(lexer);
     }
 
-    public static Parser create(Reader reader) {
-        return new Parser(LexerFactory.create(reader));
+    public static Object create(Reader reader) {
+        Object lexer = LexerFactory.create(reader);
+        return create(lexer);
     }
 
 
