@@ -6,43 +6,6 @@ init {
     p1, p2, p3, nombre : String
     d, e, contador : Int
 }
-
-a1 := d*(e - 21)/4
-
-c:=d*(e - 21)/4
-
-#+ Asignaciones de valores flotantes +#
-valor1 := 99999.99
-valor1 := 99.
-valor1 := .9999
-
-#+ Asignaciones de cadenas de texto +#
-nombre := "@sdADaSjfla%dfg"
-nombre := "asldk  fh sjf"
-
-#+ Asignación de un valor entero +#
-contador := 2
-
-#+ Estructura condicional +#
-if (valor1 > valor2) {
-    write("valor1 es mayor que valor2")
-} else {
-    write("valor1 es menor o igual a valor2")
-}
-
-#+ Estructura de bucle WHILE +#
-while (valor1 > valor2) {
-    write("valor1 es mayor que valor2")
-    valor1 := valor1 + 1
-}
-
-#+ FUNCIONES ESPECIALES VALIDAS +#
-
-x := negativeCalculation(3.5, -2.0, 4.1, -1.5, -3.0)    #+ 3 negativos (impar) => multiplicar: -2.0 * -1.5 * -3.0 = -9.0 +#
-x := negativeCalculation(-2.0, -3.0, -1.0)              #+ 3 negativos (impar) => multiplicar: -2 * -3 * -1       = -6.0 +#
-x := negativeCalculation(-5.5, -1.5)                    #+ 2 negativos (par)   => sumar: -5.5 - 1.5               = -7.0 +#
-x := negativeCalculation(4.0, -2.0, -1.0)               #+ 2 negativos (par)   => sumar: -2.0 - 1-0               = -3.0 +#
-x := negativeCalculation(3.0, 4.0)                      #+ sin negativos       => cero                            =  0   +#
-
-x := sumFirstPrimes(5)      #+ 2+3+5+7+11 = 28 +#
-x := sumFirstPrimes(0)      #+ suma de cero primos = 0 +#
+c := 3.5
+a1 := -2.0
+x := negativeCalculation(c, a1, 4.1, -1.5, -3.0)  #+ 3 negativos (impar) => multiplicar: -2.0 * -1.5 * -3.0 = -9.0 +#

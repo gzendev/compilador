@@ -1,5 +1,6 @@
 package lyc.compiler.symboltable;
 
+import lyc.compiler.asm.AsmCodeManager;
 import java.util.Objects;
 
 public class Symbol {
@@ -74,6 +75,40 @@ public class Symbol {
                 return this.intValue.toString();
             }
         }
+    }
+
+    public String getValueForAsm()
+    {
+        if(isCte())
+        {
+            if(this.type == DataType.CTE_STRING)
+            {
+                return "\"" + this.stringValue + "\"" + ",'$'";
+            }
+            return this.floatValue.toString();
+        }
+        return "?";
+    }
+
+    public String getNameForAsm()
+    {
+        // Para definir cada variable o cte en el sector de .DATA
+        if(isCte())
+        {
+            //Quito el _ del principio
+            String name = getName().substring(1);
+            return AsmCodeManager.cteToVarNameCte(name);
+        }
+        return getName();
+    }
+
+    public String getAsmType()
+    {
+        if(this.type == DataType.CTE_STRING)
+        {
+            return "db";
+        }
+        return "dd";
     }
 
     public DataType getType() {

@@ -1,5 +1,7 @@
 package lyc.compiler.terceto;
 
+import lyc.compiler.asm.AsmCodeManager;
+
 public class Terceto {
     private String primerElemento;
     private String segundoElemento;
@@ -116,6 +118,88 @@ public class Terceto {
     public Boolean esEtiqueta() {
         return getType() == TercetoType.SINGLE_VALUE &&
                 getOperando1().matches("^ET_\\w+$");
+    }
+
+    private String operandoToAsm()
+    {
+        return AsmCodeManager.operadorToAsm(this.getOperacion());
+    }
+
+    public static String tercetoToAsm(Terceto terceto, IntermediateCodeManager intCodeManager)
+    {
+        String asm = "";
+
+        if(terceto.getType() == TercetoType.SINGLE_VALUE)
+        {
+            String operando = terceto.getOperando1(intCodeManager);
+            if(terceto.esCte())
+            {
+                operando = AsmCodeManager.cteToVarNameCte(operando);
+            }
+            if(terceto.esEtiqueta())
+            {
+                asm = "\n" + operando + ":" + "\n";
+            }
+            else
+            {
+                asm = "FLD " + operando + "\n";
+            }
+        }
+
+        if(terceto.getType() == TercetoType.SEMI)
+        {
+            if(IntermediateCodeManager.esOperadorDeSalto(terceto.getOperacion()))
+            {
+                asm = terceto.operandoToAsm();
+                asm += " " + terceto.getOperando1(intCodeManager)+ "\n";
+            }
+
+            if(terceto.getOperacion().equals("ESCRIBIR") || terceto.getOperacion().equals("WRITE"))
+            {
+                asm = "FSTP varSalida\n";
+                asm += "PUSH dx\n" + "PUSH ax\n" +
+                        "\n" + "LEA dx, varSalida\n" + "MOV ah, 9\n" + "INT 21h\n" +
+                        "\n" + "POP ax\n" + "POP dx" + "\n";
+            }
+
+            if(terceto.getOperacion().equals("LEER") || terceto.getOperacion().equals("READ"))
+            {
+                asm = "FSTP varEntrada\n";
+                asm += "LEA dx, varEntrada\n" + "MOV ah, 0Ah\n" + "INT 21h\n" +
+                        "\n" + "MOV ah, 4Ch\n" + "INT 21h" + "\n";
+            }
+
+            if(terceto.getOperacion().equals("ESPRIMO"))
+            {
+                asm = "esPrimo\n";
+                asm += "FLD " + "1" + "\n";
+            }
+
+        }
+
+        if(terceto.getType() == TercetoType.FULL)
+        {
+            if(IntermediateCodeManager.esOperacionMatematica(terceto.getOperacion()))
+            {
+                asm = terceto.operandoToAsm() + "\n";
+            }
+
+            if(terceto.getOperacion().equals(":="))
+            {
+                asm += "FSTP " + terceto.getOperando2() + "\n";
+            }
+
+            if(terceto.getOperacion().equals("CMP"))
+            {
+                asm = "FXCH" + "\n";
+                asm += "FCOM" + "\n";
+                asm += "FSTSW ax" + "\n";
+                asm += "SAHF" + "\n";
+            }
+
+        }
+
+        return asm;
     }
 
     @Override

@@ -6,6 +6,7 @@ import lyc.compiler.symboltable.Symbol;
 import java.util.List;
 import java.util.ArrayList;
 import lyc.compiler.terceto.*;
+import lyc.compiler.asm.AsmCodeManager;
 
 class Parser;
 
@@ -14,10 +15,14 @@ action code
      public SymbolTableManager symbolTableManager = new SymbolTableManager();
      public ArrayList<String> varsList = new ArrayList();
      public IntermediateCodeManager intCodeManager = new IntermediateCodeManager();
+     public AsmCodeManager asmCodeManager = new AsmCodeManager();
      public String blockCondition = "IF";
 :}
 parser code
 {:
+    public String generaAssembler() {
+        return AsmCodeManager.generaAssembler(action_obj.symbolTableManager, action_obj.intCodeManager);
+    }
     public List<Symbol> getSymbolsList() {
         return action_obj.symbolTableManager.getSymbolsList();
     }
@@ -25,7 +30,6 @@ parser code
     public List<Terceto> getTercetosList() {
         return action_obj.intCodeManager.getTercetosList();
     }
-
 
     public Integer crearTerceto(String operador, String operando1, String operando2)
     {
@@ -379,6 +383,19 @@ assignment ::= IDENTIFIER:id ASSIG expression
     symbolTableManager.checkVarIsNumeric(strId);
     setPunteroTerceto("assignment", crearTerceto(":=", getStrNumeroTercetoFromPuntero("expression"), strId));
 :};
+
+
+assignment ::= IDENTIFIER:id ASSIG negativecalc
+{:
+    String strId = id.toString();
+    symbolTableManager.checkVarExists(strId);
+    //Integer numTercetoId = crearTerceto(strId);
+    setPunteroTerceto("assignment",
+    crearTerceto(":=", getStrNumeroTercetoFromPuntero("negativecalc"),
+    strId));
+    System.out.println(id+" = Calculo Negativos assignment");
+:};
+
 assignment ::= IDENTIFIER:id ASSIG SUB INTEGER_CONSTANT:constant
 {:
     String strConstant = constant.toString();
@@ -473,9 +490,6 @@ expression ::= term
     setPunteroTerceto("expression", getNumeroTercetoFromPuntero("term"));
 :};
 
-expression ::= negativecalc
-{:
-:};
 negativecalc ::= NEGATIVE_CALC OPEN_BRACKET data_list CLOSE_BRACKET
 {:
     System.out.println("Expression = negativecalc");
@@ -672,6 +686,7 @@ vartype ::= STRING
     symbolTableManager.addVars(this.varsList, DataType.CTE_STRING);
     System.out.println("Cadena");
 :};
+
 sentence ::= {:apilarIf(); blockCondition = "IF";:} if_sentence;
 
 if_sentence ::= IF conditional OPEN_CURLY block CLOSE_CURLY
@@ -686,6 +701,7 @@ if_sentence ::= IF conditional OPEN_CURLY block CLOSE_CURLY
     System.out.println("fin if");
     desapilarIf();
 :};
+
 if_sentence ::= IF conditional OPEN_CURLY block CLOSE_CURLY ELSE
 {:
     Integer numeroIf = getNumeroIf();
@@ -729,6 +745,7 @@ conditional ::= OPEN_BRACKET condition {:setPunteroTerceto("conditional", getNum
         apilarCondSuf(desapilarPuntero());
         System.out.println("and conditional");
     :};
+
 conditional ::= OPEN_BRACKET condition {:setPunteroTerceto("conditional", getNumeroTercetoFromPuntero("condition"));:}
     OR condition CLOSE_BRACKET
     {:
@@ -738,11 +755,13 @@ conditional ::= OPEN_BRACKET condition {:setPunteroTerceto("conditional", getNum
         apilarCondSuf(numeroTercetoSegundaCondicion);
         System.out.println("or conditional");
     :};
+
 conditional ::= OPEN_BRACKET NOT condition CLOSE_BRACKET {:
     apilarCondSuf(topePilaPunteros());
     actualizarTerceto(desapilarPuntero(), CampoTerceto.PRIMER_ELEM, getComparadorInverso(desapilarComparador()));
     System.out.println("single conditional  not");
 :};
+
 conditional ::= OPEN_BRACKET condition CLOSE_BRACKET {:
     System.out.println("single conditional");
     setPunteroTerceto("conditional", getNumeroTercetoFromPuntero("condition"));
