@@ -220,8 +220,7 @@ parser code
         }
     }
 
-    public Integer calcularPrimos(Integer constant)
-    {
+    public Integer calcularPrimos(Integer constant) {
         Integer resultado = 0;
         constant = Math.abs(constant);
         Integer candidato = 2;
@@ -254,7 +253,6 @@ parser code
     }
 
     public Integer calcularNegativos() {
-        //System.out.println("--------------------------------------------------------------->DEBUG pilaExpresionesContarPrimos size: " + action_obj.intCodeManager.getPilaExpresionesContarPrimosSize());
         List<Double> negativos = new ArrayList<>();
         while (!action_obj.intCodeManager.isPilaExpresionesContarPrimosEmpty()) {
             Integer numTerceto = desapilarExpresionContarPrimos();
@@ -266,13 +264,11 @@ parser code
                 System.out.println("[ERROR] No se pudo parsear a Double: " + valorStr);
                 continue;
             }
-            //System.out.println("--------------------------------------------------------------->DEBUG NICO: valor = " + valor);
             if (valor < 0) {
                 negativos.add(valor);
             }
         }
         Double resultado = 0.0;
-        //System.out.println("--------------------------------------------------------------->DEBUG NICO: negativos.size() = " + negativos.size());
         if (negativos.size() == 0) {
             resultado = 0.0;
         } else if (negativos.size() % 2 == 0) {
@@ -389,11 +385,21 @@ assignment ::= IDENTIFIER:id ASSIG negativecalc
 {:
     String strId = id.toString();
     symbolTableManager.checkVarExists(strId);
-    //Integer numTercetoId = crearTerceto(strId);
     setPunteroTerceto("assignment",
     crearTerceto(":=", getStrNumeroTercetoFromPuntero("negativecalc"),
     strId));
     System.out.println(id+" = Calculo Negativos assignment");
+:};
+
+assignment ::= IDENTIFIER:id ASSIG sumfirstprimes
+{:
+    String strId = id.toString();
+    symbolTableManager.checkVarExists(strId);
+    //Integer numTercetoId = crearTerceto(strId);
+    setPunteroTerceto("assignment",
+    crearTerceto(":=", getStrNumeroTercetoFromPuntero("sumfirstprimes"),
+    strId));
+    System.out.println(id+" = Calculo de primos assignment");
 :};
 
 assignment ::= IDENTIFIER:id ASSIG SUB INTEGER_CONSTANT:constant
@@ -437,6 +443,8 @@ assignment ::= IDENTIFIER:id ASSIG FLOAT_CONSTANT:constant
     symbolTableManager.addSymbol("_" + strConstant, float_value);
     String strId = id.toString();
     symbolTableManager.checkVarIsFloat(strId);
+    symbolTableManager.checkVarExists(strId);
+    symbolTableManager.setVarValue(strId, float_value);
     System.out.println(id+" = Float constant assignment: " + constant);
     Integer numTercetoConstant = crearTerceto(strConstant);
     setPunteroTerceto("assignment", crearTerceto(":=", "#" + numTercetoConstant.toString(), strId));
@@ -495,9 +503,7 @@ negativecalc ::= NEGATIVE_CALC OPEN_BRACKET data_list CLOSE_BRACKET
     System.out.println("Expression = negativecalc");
     calcularNegativos();
 :};
-expression ::= sumfirstprimes
-{:
-:};
+
 sumfirstprimes ::= SUM_FIRST_PRIMES OPEN_BRACKET INTEGER_CONSTANT:constant CLOSE_BRACKET
 {:
     System.out.println("Expression = sumfirstprimes");

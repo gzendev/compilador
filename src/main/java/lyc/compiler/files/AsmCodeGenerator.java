@@ -2,11 +2,8 @@ package lyc.compiler.files;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
+import lyc.compiler.symboltable.DataType;
 import lyc.compiler.terceto.Terceto;
 import lyc.compiler.symboltable.Symbol;
 
@@ -32,7 +29,7 @@ public class AsmCodeGenerator implements FileGenerator {
         fileWriter.write(".MODEL LARGE\n");
         fileWriter.write(".386\n");
         fileWriter.write(".STACK 200h\n\n");
-        fileWriter.write(generateDataSegment());
+        fileWriter.write(grabarTablaSimbolos());
         fileWriter.write(".CODE\n");
         fileWriter.write("MAIN:\n");
         fileWriter.write("    MOV  AX,@DATA\n");
@@ -97,7 +94,7 @@ public class AsmCodeGenerator implements FileGenerator {
         if (name.startsWith("_")) return name;
         // No agregar guion bajo a temporales (__@aux...)
         if (name.startsWith("__@aux")) return name;
-        return "_" + name;
+        return name;
     }
 
     private boolean isVariableOrNumber(String val) {
@@ -136,6 +133,45 @@ public class AsmCodeGenerator implements FileGenerator {
                 "    _21      DD 21.0\n\n";
     }
 
+    private String grabarTablaSimbolos(){
+        String out = "";
+        out += ".DATA\n";
+        try{
+            for (Iterator<Symbol> it = this.symbols.iterator(); it.hasNext(); ) {
+                Symbol symbol = (Symbol) it.next();
+                if(isNumber(symbol)){
+                    out += symbol.getName() + " DD ";
+                    if(symbol.getStringValue().equals("-"))
+                        out += " ?\n";
+                    else {
+                        out += symbol.getStringValue() + "\n";
+                    }
+
+                }
+                else if(isString(symbol)){
+                    out += symbol.getName() + " DB ";
+                    if(symbol.getStringValue().equals("-"))
+                        out += "MAXTEXTSIZE" +" dup (?)\n";
+                    else
+                        out += symbol.getStringValue() + ", '$'\n";
+                }
+            }
+
+        }catch(Exception e){
+            System.out.println("Error al leer la tabla de simbolos");
+        }
+        return out;
+    }
+
+    private  boolean isNumber(Symbol symbol) throws Exception{
+        DataType tipo = symbol.getType();
+        return tipo.equals(DataType.CTE_INTEGER) || tipo.equals(DataType.CTE_FLOAT);
+    }
+    private boolean isString(Symbol symbol) throws Exception{
+        DataType tipo = symbol.getType();
+        return tipo.equals(DataType.CTE_STRING);
+    }
+
     private String generateCodeSegment() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tercetos.size(); i++) {
@@ -157,19 +193,17 @@ public class AsmCodeGenerator implements FileGenerator {
                 // Para referencias a cadena, solo comentario
                 return "";
             }
-            if (isVariableOrNumber(val) && !isTercetoRef(val)) {
-                if (val.matches("\\d+")) {
-                    sb.append(String.format("    FLD  _%s\n", val));
-                } else {
-                    sb.append(String.format("    FLD  %s\n", asmName(val)));
-                }
-            }
             return sb.toString();
         }
         switch (op) {
             case ":=": {
                 String src = t.getOperando1();
                 String dst = t.getOperando2();
+                if (idx == 1 || idx == 3 || idx == 5) {
+                    int refIdx = Integer.parseInt(src.substring(1));
+                    src = tercetos.get(refIdx).getOperando1();
+                    sb.append(String.format("    FLD  %s\n", src));
+                }
                 sb.append(String.format("    FSTP %s\n", asmName(dst)));
                 break;
             }

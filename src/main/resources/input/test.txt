@@ -6,6 +6,14 @@ init {
     p1, p2, p3, nombre : String
     d, e, contador : Int
 }
-c := 3.5
-a1 := -2.0
-x := negativeCalculation(c, a1, 4.1, -1.5, -3.0)  #+ 3 negativos (impar) => multiplicar: -2.0 * -1.5 * -3.0 = -9.0 +#
+
+x := 0
+
+#+ Funcion especial 1 +#
+a1 := negativeCalculation(3.5, -2.0, 4.1, -1.5, -3.0)    #+ 3 negativos (impar) => multiplicar: -2.0 * -1.5 * -3.0 = -9.0 +#
+
+#+ Funcion especial 2 +#
+c := sumFirstPrimes(5)      #+ 2+3+5+7+11 = 28 +#
+
+#+ Concateno con operaciones elementales +#
+x := c + a1 * 3 - 4 + c / 7
